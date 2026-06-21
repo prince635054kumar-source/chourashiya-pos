@@ -26,20 +26,21 @@
   <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
 
   <h1>🏪 Chourashiya General Store</h1>
-  <p style="color:#27ae60;font-weight:bold;">🤖 Smart AI POS</p>
+  <p style="color:#27ae60;font-weight:bold;">🤖 Hindi Voice AI Assistant</p>
 
   <!-- AI Assistant -->
   <div class="section ai-section">
-    <h2>🤖 AI Assistant</h2>
+    <h2>🤖 Hindi AI Assistant</h2>
+    <p><strong>बोलें या लिखें:</strong> आलू का रेट, प्याज कितने का, टमाटर प्राइस</p>
     <div style="display:flex;gap:8px;">
-      <input id="aiQuery" placeholder="potato rate, onion, tomato..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
-      <button onclick="startVoice()" class="success">🎤</button>
+      <input id="aiQuery" placeholder="आलू का रेट बताओ..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+      <button onclick="startVoice()" class="success" style="padding:12px 20px;">🎤 बोलें</button>
       <button onclick="askAI()" class="success">Ask</button>
     </div>
-    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:80px;"></div>
+    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:90px;"></div>
   </div>
 
-  <!-- Vegetable Selling (Grams) -->
+  <!-- Vegetable -->
   <div class="section">
     <h2>🥕 Vegetable Selling (Grams)</h2>
     <input id="vegName" placeholder="Sabji Naam" style="width:32%;">
@@ -51,7 +52,7 @@
   <!-- Inventory -->
   <div class="section">
     <h2>📦 Inventory</h2>
-    <input id="name" placeholder="Item Name" style="width:35%;">
+    <input id="name" placeholder="Item Name (Aloo, Pyaj...)" style="width:35%;">
     <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
     <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
     <input id="qty" type="number" value="10" style="width:80px;">
@@ -79,7 +80,6 @@
     let products = [];
     let bill = [];
 
-    // Add to Inventory
     function addProduct() {
       const name = document.getElementById("name").value.trim();
       const cost = parseFloat(document.getElementById("cost").value) || 0;
@@ -120,7 +120,7 @@
       }
     }
 
-    // Improved AI
+    // ==================== BETTER HINDI AI ====================
     function askAI() {
       const query = document.getElementById("aiQuery").value.toLowerCase().trim();
       processAIQuery(query);
@@ -128,42 +128,52 @@
 
     function startVoice() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert("Voice support nahi hai is browser mein");
+      if (!SpeechRecognition) return alert("Voice support nahi hai is browser mein. Chrome use करें।");
+      
       const recognition = new SpeechRecognition();
       recognition.lang = 'hi-IN';
+      recognition.interimResults = false;
       recognition.onresult = (e) => {
         const text = e.results[0][0].transcript;
         document.getElementById("aiQuery").value = text;
         processAIQuery(text.toLowerCase());
       };
+      recognition.onerror = () => alert("Voice samajh nahi aaya, दोबारा बोलें");
       recognition.start();
     }
 
     function processAIQuery(query) {
       const div = document.getElementById("aiResponse");
-      if (!query) return;
+      if (!query) return div.innerHTML = "कुछ बोलें या लिखें...";
 
-      const found = products.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        query.includes(p.name.toLowerCase().split(" ")[0])
-      );
+      // Enhanced Hindi + English matching
+      const found = products.filter(p => {
+        const itemName = p.name.toLowerCase();
+        return itemName.includes(query) || 
+               query.includes(itemName) ||
+               query.includes(itemName.split(" ")[0]) ||
+               // Hindi common words
+               (query.includes("आलू") && itemName.includes("potato")) ||
+               (query.includes("प्याज") && itemName.includes("onion")) ||
+               (query.includes("टमाटर") && itemName.includes("tomato"));
+      });
 
       if (found.length > 0) {
-        let html = "<b>✅ Found:</b><br>";
+        let html = "<b>✅ मिला:</b><br>";
         found.forEach(item => {
-          html += `• <strong>${item.name}</strong> → Selling Rate: <b>₹${item.selling}</b> 
-                   <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Add to Bill</button><br>`;
+          html += `• <strong>${item.name}</strong> → बिक्री मूल्य: <b>₹${item.selling}</b> 
+                   <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Bill में जोड़ें</button><br>`;
         });
         div.innerHTML = html;
       } else {
-        div.innerHTML = `❌ "${query}" inventory में नहीं मिला।<br>पहले Inventory में Add करें।`;
+        div.innerHTML = `❌ "${query}" इन्वेंटरी में नहीं मिला।<br>पहले Inventory में जोड़ें।`;
       }
     }
 
     function quickAdd(name) {
       const item = products.find(p => p.name === name);
       if (item) {
-        const qty = prompt("Quantity?", "1");
+        const qty = prompt("Quantity कितनी है?", "1");
         if (qty) {
           const q = parseFloat(qty);
           bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
@@ -172,20 +182,20 @@
       }
     }
 
-    // Vegetable - Grams to Kg Conversion
+    // Vegetable (Grams)
     function addVegetableToBill() {
       const name = document.getElementById("vegName").value.trim();
       const grams = parseFloat(document.getElementById("vegGrams").value);
       const ratePerKg = parseFloat(document.getElementById("vegRateKg").value);
 
-      if (!name || !grams || !ratePerKg) return alert("Sabji, Grams और Rate per Kg डालें");
+      if (!name || !grams || !ratePerKg) return alert("सभी जानकारी भरें");
 
       const kg = grams / 1000;
       const amount = kg * ratePerKg;
 
       bill.push({
         name: name + " (Sabzi)",
-        qty: grams + " gm",
+        qty: grams + " gm (" + kg.toFixed(3) + " kg)",
         rate: ratePerKg + "/kg",
         total: amount
       });
@@ -215,21 +225,21 @@
     }
 
     function removeFromBill(i) {
-      if (confirm("Remove?")) {
+      if (confirm("Remove करें?")) {
         bill.splice(i, 1);
         showBill();
       }
     }
 
     function clearBill() {
-      if (confirm("Clear bill?")) {
+      if (confirm("पूरा बिल क्लियर करें?")) {
         bill = [];
         showBill();
       }
     }
 
     function printBill() {
-      alert("✅ Bill Saved!\nCtrl + P से Print करें");
+      alert("✅ बिल सेव हो गया!\nPrint के लिए Ctrl + P दबाएं");
     }
 
     function toggleTheme() {
