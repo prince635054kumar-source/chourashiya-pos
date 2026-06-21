@@ -1,416 +1,643 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="hi" data-theme="light">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Chourashiya General Store</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;}
-    [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;}
-   
-    body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
-    h1,h2{margin:12px 0;color:var(--text);}
-    #splashScreen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: linear-gradient(135deg, #3498db, #27ae60);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; color: white; text-align: center;
-      animation: fadeOut 2.8s forwards 2s;
+    :root, [data-theme="light"] {
+      --font-body: 'Satoshi', system-ui, sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem;
+      --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+      --color-bg:#f7f6f2; --color-surface:#f9f8f5; --color-surface-2:#fbfbf9; --color-surface-offset:#edeae5;
+      --color-text:#28251d; --color-text-muted:#6f6b63; --color-border:#d4d1ca; --color-divider:#dcd9d5;
+      --color-primary:#01696f; --color-primary-hover:#0c4e54; --color-primary-soft:#d8e8e8;
+      --color-success:#437a22; --color-success-soft:#dce8d5; --color-warning:#964219; --color-warning-soft:#f0dfd5;
+      --color-error:#a13544; --color-error-soft:#f2dadd; --shadow-sm:0 1px 2px rgba(0,0,0,.05); --shadow-md:0 8px 24px rgba(0,0,0,.08);
+      --radius-sm:0.5rem; --radius-md:0.75rem; --radius-lg:1rem; --radius-full:999px;
     }
-    .store-name { font-size: 2.6rem; font-weight: bold; margin: 8px 0; text-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .tagline { font-size: 1.3rem; animation: fadeIn 1.5s ease 0.6s both; }
-
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
-
-    .tabs { display: flex; margin: 15px 0; background: var(--card); border-radius: 12px; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .tab { flex: 1; padding: 14px; text-align: center; font-weight: bold; border-radius: 10px; cursor: pointer; }
-    .tab.active { background: var(--primary); color: white; }
-
-    table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-    th,td{padding:12px;border:1px solid var(--border);text-align:left;}
-    th{background:var(--primary);color:white;}
-    input,button{padding:12px;margin:5px;font-size:16px;border-radius:8px;border:1px solid var(--border);}
-    button{cursor:pointer;font-weight:600;}
-    .success{background:var(--success);color:white;border:none;}
-    .danger{background:var(--danger);color:white;border:none;}
-    .section{background:var(--card);padding:15px;border-radius:12px;margin:12px 0;}
-    .ai-section{border:3px solid var(--primary);}
-    .total{font-size:1.9em;font-weight:bold;color:var(--success);}
-    .flex-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-    .mic-btn{font-size:24px;padding:14px 18px !important;}
-    .mic-btn.listening { background: #e74c3c !important; transform: scale(1.1); }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-    #readerHome, #readerInv { width: 100%; max-width: 400px; margin: 10px auto; border: 3px solid var(--primary); border-radius: 12px; }
+    [data-theme="dark"] {
+      --color-bg:#171614; --color-surface:#1c1b19; --color-surface-2:#201f1d; --color-surface-offset:#2a2927;
+      --color-text:#ece9e2; --color-text-muted:#a4a095; --color-border:#393836; --color-divider:#2a2927;
+      --color-primary:#4f98a3; --color-primary-hover:#227f8b; --color-primary-soft:#22373b;
+      --color-success:#76b553; --color-success-soft:#24341e; --color-warning:#d08a62; --color-warning-soft:#3a2a22;
+      --color-error:#dd6974; --color-error-soft:#42272a; --shadow-sm:0 1px 2px rgba(0,0,0,.25); --shadow-md:0 12px 32px rgba(0,0,0,.35);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      min-height: 100dvh; font-family: var(--font-body); font-size: var(--text-base); color: var(--color-text);
+      background: var(--color-bg); line-height: 1.5;
+    }
+    button, input { font: inherit; }
+    button { cursor: pointer; border: 0; }
+    input { background: var(--color-surface-2); color: var(--color-text); border: 1px solid var(--color-border); border-radius: var(--radius-sm); min-height: 44px; padding: 0.8rem 0.9rem; width: 100%; }
+    input:focus-visible, button:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+    .hidden { display: none !important; }
+    .app-shell { max-width: 1200px; margin: 0 auto; padding: var(--space-4); }
+    .topbar { display:flex; align-items:center; justify-content:space-between; gap:var(--space-3); margin-bottom:var(--space-4); }
+    .brand { display:flex; align-items:center; gap:var(--space-3); }
+    .logo { width:48px; height:48px; border-radius:14px; background: var(--color-primary-soft); color:var(--color-primary); display:grid; place-items:center; }
+    .brand h1 { font-size: var(--text-lg); }
+    .brand p { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .header-actions { display:flex; gap:var(--space-2); flex-wrap:wrap; }
+    .btn { min-height:44px; padding:0.75rem 1rem; border-radius:var(--radius-sm); border:1px solid transparent; font-size:var(--text-sm); font-weight:700; }
+    .btn-primary { background: var(--color-primary); color: #fff; }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface); color: var(--color-text); border-color: var(--color-border); }
+    .btn-danger { background: var(--color-error); color: #fff; }
+    .btn-success { background: var(--color-success); color: #fff; }
+    .tabs { display:grid; grid-template-columns:repeat(3,1fr); gap:var(--space-2); margin-bottom:var(--space-4); }
+    .tab { min-height:48px; background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-md); font-weight:700; color:var(--color-text-muted); }
+    .tab.active { background:var(--color-primary); color:#fff; border-color:var(--color-primary); }
+    .tab-content { display:none; }
+    .tab-content.active { display:block; }
+    .grid { display:grid; gap:var(--space-4); }
+    .grid-2 { grid-template-columns:1fr; }
+    .section { background:var(--color-surface); border:1px solid var(--color-border); border-radius:var(--radius-lg); padding:var(--space-4); box-shadow:var(--shadow-sm); content-visibility:auto; }
+    .section h2 { font-size: var(--text-lg); margin-bottom: var(--space-3); }
+    .section-head { display:flex; justify-content:space-between; align-items:center; gap:var(--space-3); margin-bottom:var(--space-3); flex-wrap:wrap; }
+    .flex-row { display:flex; gap:var(--space-2); flex-wrap:wrap; }
+    .flex-row > * { flex:1 1 140px; }
+    .metrics { display:grid; grid-template-columns:repeat(2,1fr); gap:var(--space-3); }
+    .metric { background:var(--color-surface-2); border:1px solid var(--color-border); border-radius:var(--radius-md); padding:var(--space-4); }
+    .metric-label { font-size:var(--text-sm); color:var(--color-text-muted); }
+    .metric-value { font-size:var(--text-lg); font-weight:700; margin-top:0.25rem; }
+    .table-wrap { overflow:auto; border:1px solid var(--color-divider); border-radius:var(--radius-md); }
+    table { width:100%; border-collapse:collapse; min-width:640px; }
+    th, td { padding:0.85rem; border-bottom:1px solid var(--color-divider); text-align:left; font-size:var(--text-sm); }
+    th { background:var(--color-surface-2); }
+    .amount { font-variant-numeric: tabular-nums; font-weight:700; }
+    .total { font-size:var(--text-xl); font-weight:700; color:var(--color-success); }
+    .badge { display:inline-flex; align-items:center; gap:0.35rem; padding:0.25rem 0.55rem; border-radius:var(--radius-full); font-size:var(--text-xs); font-weight:700; background:var(--color-surface-offset); }
+    .badge-low { color:var(--color-warning); background:var(--color-warning-soft); }
+    .badge-ok { color:var(--color-success); background:var(--color-success-soft); }
+    .empty { text-align:center; color:var(--color-text-muted); padding:1rem; }
+    .ai-box { min-height:110px; background:var(--color-surface-2); border:1px dashed var(--color-border); border-radius:var(--radius-md); padding:var(--space-4); color:var(--color-text-muted); }
+    .login-screen, .splash-screen, .scanner-overlay, .modal { position:fixed; inset:0; z-index:9999; }
+    .login-screen, .splash-screen { display:flex; align-items:center; justify-content:center; padding:var(--space-4); background:linear-gradient(135deg, #0c4e54, #437a22); }
+    .login-card, .splash-card { width:min(100%, 360px); background:rgba(255,255,255,.14); backdrop-filter: blur(12px); color:#fff; border-radius:22px; padding:2rem; border:1px solid rgba(255,255,255,.25); }
+    .login-card h2, .splash-card h2 { font-size:var(--text-xl); margin-bottom:var(--space-2); }
+    .scanner-overlay, .modal { display:none; align-items:center; justify-content:center; padding:var(--space-4); background:rgba(0,0,0,.78); }
+    .scanner-card, .modal-card { width:min(100%, 460px); background:var(--color-surface); color:var(--color-text); border-radius:var(--radius-lg); padding:var(--space-4); box-shadow:var(--shadow-md); }
+    #reader { width:100%; overflow:hidden; border-radius:var(--radius-md); }
+    .hint { color:var(--color-text-muted); font-size:var(--text-sm); }
+    .inline-actions { display:flex; gap:0.4rem; flex-wrap:wrap; }
+    .icon-btn { min-height:38px; padding:0.5rem 0.75rem; border-radius:var(--radius-sm); border:1px solid var(--color-border); background:var(--color-surface-2); }
+    .invoice { display:none; background:#fff; color:#000; padding:16px; }
+    .invoice h2 { margin-bottom:8px; }
+    @media (min-width: 860px) { .grid-2 { grid-template-columns:1.2fr 0.8fr; } .metrics { grid-template-columns:repeat(4,1fr); } }
+    @media (max-width: 640px) { .tabs { position:sticky; bottom:0; background:var(--color-bg); padding-top:var(--space-2); z-index:20; } .topbar { align-items:flex-start; flex-direction:column; } }
+    @media print {
+      body * { visibility:hidden; }
+      #printInvoice, #printInvoice * { visibility:visible; }
+      #printInvoice { display:block !important; position:fixed; inset:0; background:#fff; color:#000; z-index:999999; }
+      @page { margin: 8mm; }
+    }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splashScreen">
-    <h1 class="store-name">🏪 Chourashiya</h1>
-    <h1 class="store-name" style="margin-top:-12px;">General Store</h1>
-    <p class="tagline">Smart POS System</p>
-  </div>
+  <a href="#mainApp" class="sr-only">Skip to content</a>
 
-  <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
-
-  <h1 style="text-align:center;">🏪 Chourashiya General Store</h1>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <div class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</div>
-    <div class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</div>
-  </div>
-
-  <!-- ==================== HOME TAB ==================== -->
-  <div id="content0" class="tab-content active">
-    <div class="section" style="background:#fff3cd; font-size:0.9em;">
-      💾 Data Save Mode: <span id="saveStatus">Browser Storage</span>
-    </div>
-
-    <!-- AI Assistant -->
-    <div class="section ai-section">
-      <h2>🤖 Voice + AI Assistant</h2>
-      <div class="flex-row">
-        <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
-        <button onclick="startVoice()" id="micButton" class="success mic-btn">🎤</button>
-        <button onclick="askAI()" class="success">Ask AI</button>
-      </div>
-      <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:130px;white-space:pre-wrap;"></div>
-    </div>
-
-    <!-- Camera Scanner Home -->
-    <div class="section">
-      <h2>📱 Camera Barcode Scanner</h2>
-      <button onclick="startCameraScan('home')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode (Bill में जोड़ें)</button>
-      <div id="readerHome" style="display:none;"></div>
-    </div>
-
-    <!-- Grocery & Vegetable -->
-    <div class="section">
-      <h2>🛒 Grocery Selling</h2>
-      <div class="flex-row">
-        <input id="groceryName" placeholder="Item Name" style="flex:1;">
-        <input id="groceryQty" type="number" placeholder="Qty" style="width:90px;">
-        <input id="groceryRate" type="number" placeholder="Rate" style="width:110px;">
-        <button onclick="addGroceryToBill()" class="success">Add</button>
-      </div>
-    </div>
-
-    <div class="section">
-      <h2>🥕 Vegetable Selling</h2>
-      <div class="flex-row">
-        <input id="vegName" placeholder="Sabji Naam" style="flex:1;">
-        <input id="vegGrams" type="number" step="1" placeholder="Grams" style="width:110px;">
-        <input id="vegRateKg" type="number" placeholder="Rate/Kg" style="width:130px;">
-        <button onclick="addVegetableToBill()" class="success">Add</button>
-      </div>
-    </div>
-
-    <!-- Bill -->
-    <div class="section bill">
-      <h2>🛒 Customer Bill</h2>
-      <table id="billTable">
-        <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
-      <div class="flex-row" style="justify-content:center;">
-        <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
-        <button onclick="printBill()" class="success" style="width:48%;">🖨️ Print Bill</button>
+  <div id="loginScreen" class="login-screen">
+    <div class="login-card">
+      <h2>🔐 Login</h2>
+      <p style="margin-bottom:1rem;">Chourashiya General Store POS</p>
+      <label for="passwordInput" class="sr-only">Password</label>
+      <input type="password" id="passwordInput" placeholder="1234" />
+      <div class="flex-row" style="margin-top:1rem;">
+        <button class="btn btn-primary" onclick="performLogin()">Login</button>
       </div>
     </div>
   </div>
 
-  <!-- ==================== INVENTORY TAB ==================== -->
-  <div id="content1" class="tab-content">
-    <div class="section">
-      <h2>📦 Add Product</h2>
-      <div class="flex-row">
-        <input id="barcodeInv" placeholder="Barcode" style="width:160px;">
-        <input id="name" placeholder="Item Name" style="flex:1;">
-        <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
-        <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
-        <input id="qty" type="number" value="10" style="width:80px;">
-        <button onclick="addProduct()" class="success">Add to Inventory</button>
+  <div id="splashScreen" class="splash-screen hidden">
+    <div class="splash-card">
+      <h2>🏪 Chourashiya</h2>
+      <p>General Store Smart POS</p>
+    </div>
+  </div>
+
+  <main id="mainApp" class="app-shell hidden">
+    <header class="topbar">
+      <div class="brand">
+        <div class="logo" aria-label="Store logo">
+          <svg viewBox="0 0 48 48" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10 21h28v17H10z"></path>
+            <path d="M14 21v-7l10-5 10 5v7"></path>
+            <path d="M20 38V28h8v10"></path>
+          </svg>
+        </div>
+        <div>
+          <h1>Chourashiya General Store</h1>
+          <p>Mobile POS, inventory and bill print</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary" aria-label="Theme toggle" onclick="toggleTheme()">🌙 Theme</button>
+        <button class="btn btn-secondary" onclick="showSettings()">⚙️ Settings</button>
+        <button class="btn btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Main tabs">
+      <button class="tab active" id="tab0" onclick="switchTab(0)">🏠 Home</button>
+      <button class="tab" id="tab1" onclick="switchTab(1)">📦 Inventory</button>
+      <button class="tab" id="tab2" onclick="switchTab(2)">👑 Owner</button>
+    </nav>
+
+    <section id="content0" class="tab-content active">
+      <div class="grid grid-2">
+        <div class="grid">
+          <article class="section">
+            <h2>🤖 Smart Assistant</h2>
+            <div class="flex-row">
+              <input id="aiQuery" placeholder="जैसे: total batao" onkeypress="if(event.key==='Enter') askAI()" />
+              <button class="btn btn-primary" onclick="askAI()">Ask</button>
+            </div>
+            <div id="aiResponse" class="ai-box" style="margin-top:1rem;">कुछ पूछिए...</div>
+          </article>
+
+          <article class="section">
+            <div class="section-head">
+              <h2>📸 Barcode Selling</h2>
+            </div>
+            <button class="btn btn-success" style="width:100%;" onclick="startCameraScan('sell')">Scan Barcode (Sell)</button>
+            <p class="hint" style="margin-top:0.75rem;">Scan होने पर inventory item मिले तो quantity पूछी जाएगी।</p>
+          </article>
+
+          <article class="section">
+            <h2>🛒 Grocery Selling</h2>
+            <div class="flex-row">
+              <input id="groceryName" placeholder="Item Name" />
+              <input id="groceryQty" type="number" min="0" step="1" placeholder="Qty" />
+              <input id="groceryRate" type="number" min="0" step="0.01" placeholder="Rate" />
+              <button class="btn btn-success" onclick="addGroceryToBill()">Add</button>
+            </div>
+          </article>
+
+          <article class="section">
+            <h2>🥕 Vegetable Selling</h2>
+            <div class="flex-row">
+              <input id="vegName" placeholder="Sabji Naam" />
+              <input id="vegGrams" type="number" min="0" step="1" placeholder="Grams" />
+              <input id="vegRateKg" type="number" min="0" step="0.01" placeholder="Rate / Kg" />
+              <button class="btn btn-success" onclick="addVegetableToBill()">Add</button>
+            </div>
+          </article>
+        </div>
+
+        <article class="section">
+          <div class="section-head">
+            <h2>🧾 Current Bill</h2>
+            <span class="badge">Items: <span id="billCount">0</span></span>
+          </div>
+          <div class="table-wrap">
+            <table id="billTable">
+              <thead>
+                <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="total" style="margin-top:1rem;">Grand Total: ₹<span id="grandTotal">0.00</span></p>
+          <div class="flex-row" style="margin-top:1rem;">
+            <button class="btn btn-danger" onclick="clearBill()">Clear Bill</button>
+            <button class="btn btn-primary" onclick="printBill()">Print Bill</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="content1" class="tab-content">
+      <article class="section">
+        <div class="section-head">
+          <h2>📦 Inventory Control</h2>
+          <button class="btn btn-success" onclick="startCameraScan('inventory')">Scan Barcode (Add Product)</button>
+        </div>
+        <div class="flex-row">
+          <input id="barcodeInv" placeholder="Barcode" />
+          <input id="name" placeholder="Item Name" />
+          <input id="selling" type="number" min="0" step="0.01" placeholder="Selling Price" />
+          <input id="qty" type="number" min="0" step="1" value="10" placeholder="Qty" />
+          <button class="btn btn-primary" onclick="addProduct()">Add Product</button>
+        </div>
+        <p class="hint" style="margin-top:0.75rem;">अगर barcode पहले से inventory में है, app बताएगा कि item पहले से मौजूद है और edit option देगा.</p>
+      </article>
+
+      <article class="section">
+        <div class="section-head">
+          <h2>Inventory List</h2>
+          <input id="inventorySearch" placeholder="Search item or barcode" oninput="filterInventory()" style="max-width:240px;" />
+        </div>
+        <div class="table-wrap">
+          <table id="productTable">
+            <thead>
+              <tr><th>Barcode</th><th>Name</th><th>Rate</th><th>Stock</th><th>Status</th><th>Action</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </article>
+    </section>
+
+    <section id="content2" class="tab-content">
+      <article class="section">
+        <div class="section-head">
+          <h2>👑 Owner Dashboard</h2>
+          <button class="btn btn-secondary" onclick="refreshDashboard()">Refresh</button>
+        </div>
+        <div class="metrics">
+          <div class="metric"><div class="metric-label">Today's Sales</div><div class="metric-value">₹<span id="todaySales">0.00</span></div></div>
+          <div class="metric"><div class="metric-label">Printed Bills</div><div class="metric-value"><span id="printedBills">0</span></div></div>
+          <div class="metric"><div class="metric-label">Total Products</div><div class="metric-value"><span id="totalProducts">0</span></div></div>
+          <div class="metric"><div class="metric-label">Low Stock Items</div><div class="metric-value"><span id="lowStockCount">0</span></div></div>
+        </div>
+        <div class="metrics" style="margin-top:1rem;">
+          <div class="metric"><div class="metric-label">Inventory Value</div><div class="metric-value">₹<span id="inventoryValue">0.00</span></div></div>
+          <div class="metric"><div class="metric-label">Average Price</div><div class="metric-value">₹<span id="avgPrice">0.00</span></div></div>
+        </div>
+      </article>
+    </section>
+  </main>
+
+  <div id="scannerOverlay" class="scanner-overlay">
+    <div class="scanner-card">
+      <div class="section-head">
+        <h2>📸 Barcode Scanner</h2>
+        <button class="btn btn-danger" onclick="stopScanning()">Cancel</button>
+      </div>
+      <p class="hint" style="margin-bottom:0.75rem;">Barcode camera के सामने रखें.</p>
+      <div id="reader"></div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal">
+    <div class="modal-card">
+      <h2 style="margin-bottom:1rem;">⚙️ Settings</h2>
+      <div class="grid">
+        <button class="btn btn-secondary" onclick="toggleTheme()">Dark / Light Mode</button>
+        <button class="btn btn-success" onclick="exportData()">Export Backup</button>
+        <button class="btn btn-danger" onclick="clearAllData()">Clear All Data</button>
+        <button class="btn btn-secondary" onclick="closeSettings()">Close</button>
       </div>
     </div>
+  </div>
 
-    <div class="section">
-      <h2>📱 Camera Barcode Scanner (Inventory)</h2>
-      <button onclick="startCameraScan('inventory')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode</button>
-      <div id="readerInv" style="display:none;"></div>
+  <div id="editModal" class="modal">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>✏️ Edit Product</h2>
+        <button class="btn btn-secondary" onclick="closeEditModal()">Close</button>
+      </div>
+      <div class="grid">
+        <input id="editBarcode" placeholder="Barcode" disabled />
+        <input id="editName" placeholder="Item Name" />
+        <input id="editSelling" type="number" min="0" step="0.01" placeholder="Selling Price" />
+        <input id="editQty" type="number" min="0" step="1" placeholder="Stock Qty" />
+        <div class="flex-row">
+          <button class="btn btn-primary" onclick="saveProductEdit()">Save Changes</button>
+          <button class="btn btn-danger" onclick="deleteEditedProduct()">Delete Product</button>
+        </div>
+      </div>
     </div>
+  </div>
 
-    <table id="productTable">
-      <thead><tr><th>Barcode</th><th>Name</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead>
-      <tbody></tbody>
+  <div id="duplicateModal" class="modal">
+    <div class="modal-card">
+      <h2 style="margin-bottom:0.75rem;">⚠️ Product Already Exists</h2>
+      <p id="duplicateMessage" class="hint" style="margin-bottom:1rem;"></p>
+      <div class="flex-row">
+        <button class="btn btn-primary" onclick="editDuplicateProduct()">Edit Product</button>
+        <button class="btn btn-secondary" onclick="closeDuplicateModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="printInvoice" class="invoice">
+    <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px;">
+      <h2>Chourashiya General Store</h2>
+      <p>Jaipur, Rajasthan</p>
+      <p>Date: <span id="printDate"></span></p>
+      <p>Bill No: <span id="printBillNo"></span></p>
+    </div>
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr><th style="text-align:left;padding:8px;border-bottom:1px solid #000;">Item</th><th style="padding:8px;border-bottom:1px solid #000;">Qty</th><th style="padding:8px;border-bottom:1px solid #000;">Rate</th><th style="padding:8px;border-bottom:1px solid #000;">Amount</th></tr></thead>
+      <tbody id="printBillItems"></tbody>
     </table>
-  </div>
-
-  <div style="text-align:center;margin:20px;">
-    <button onclick="exportData()" class="success">📤 Export Backup</button>
-    <button onclick="clearAllData()" class="danger">🗑️ Clear All</button>
+    <div style="margin-top:16px;text-align:right;">
+      <p style="font-size:20px;font-weight:bold;">Total: ₹<span id="printTotal"></span></p>
+    </div>
+    <div style="margin-top:22px;text-align:center;font-size:12px;">Thank you for shopping.</div>
   </div>
 
   <script>
-    let products = [];
+    let products = [
+      { barcode: '8901234567890', name: 'Parle-G Biscuit', selling: 10, qty: 150 },
+      { barcode: '8909876543210', name: 'Aashirvaad Atta', selling: 220, qty: 45 }
+    ];
     let bill = [];
     let html5QrCode = null;
-    let currentMode = null;
+    let currentScanMode = null;
+    let todaySales = 0;
+    let printedBills = 0;
+    let editingIndex = null;
+    let duplicateIndex = null;
+    let themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 
-    function saveData() {
-      try {
-        localStorage.setItem("chourashiya_products", JSON.stringify(products));
-        localStorage.setItem("chourashiya_bill", JSON.stringify(bill));
-      } catch(e){}
+    function rupees(v) { return (Number(v) || 0).toFixed(2); }
+    function setTheme(mode) { themeMode = mode; document.documentElement.setAttribute('data-theme', mode); }
+    function toggleTheme() { setTheme(themeMode === 'dark' ? 'light' : 'dark'); }
+    function performLogin() {
+      const pass = document.getElementById('passwordInput').value;
+      if (pass === '1234') {
+        document.getElementById('loginScreen').classList.add('hidden');
+        startApp();
+      } else alert('Default Password: 1234');
     }
-
-    function loadData() {
-      try {
-        const savedProducts = localStorage.getItem("chourashiya_products");
-        if (savedProducts) products = JSON.parse(savedProducts);
-        const savedBill = localStorage.getItem("chourashiya_bill");
-        if (savedBill) bill = JSON.parse(savedBill);
-      } catch(e){}
+    function startApp() {
+      setTheme(themeMode);
+      document.getElementById('splashScreen').classList.remove('hidden');
+      setTimeout(() => {
+        document.getElementById('splashScreen').classList.add('hidden');
+        document.getElementById('mainApp').classList.remove('hidden');
+        switchTab(0);
+        refreshAll();
+      }, 1400);
     }
-
     function switchTab(n) {
-      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-      document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+      document.querySelectorAll('.tab-content').forEach((c, i) => c.classList.toggle('active', i === n));
     }
+    function showSettings() { document.getElementById('settingsModal').style.display = 'flex'; }
+    function closeSettings() { document.getElementById('settingsModal').style.display = 'none'; }
+    function logout() { if (confirm('Logout?')) location.reload(); }
+    function getBillTotal() { return bill.reduce((sum, item) => sum + (Number(item.total) || 0), 0); }
 
-    // ==================== CAMERA SCANNER ====================
-    function startCameraScan(mode) {
-      currentMode = mode;
-      const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
-      const readerDiv = document.getElementById(readerId);
-      readerDiv.style.display = 'block';
-
+    async function startCameraScan(mode) {
+      currentScanMode = mode;
+      document.getElementById('scannerOverlay').style.display = 'flex';
       if (html5QrCode) {
-        html5QrCode.clear();
+        try { await html5QrCode.stop(); } catch(e) {}
+        try { await html5QrCode.clear(); } catch(e) {}
       }
-
-      html5QrCode = new Html5Qrcode(readerId);
-
+      html5QrCode = new Html5Qrcode('reader');
       html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 280, height: 280 } },
-        (decodedText) => {
-          handleScanResult(decodedText, mode);
-        },
-        (errorMessage) => {}
-      ).catch((err) => {
-        alert("Camera Start करने में समस्या: " + err);
-        readerDiv.style.display = 'none';
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 260, height: 180 } },
+        (decodedText) => handleScanResult(decodedText, mode),
+        () => {}
+      ).catch(err => {
+        alert('Camera Error: ' + err);
+        stopScanning();
       });
     }
-
-    function handleScanResult(barcode, mode) {
+    async function stopScanning() {
       if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          document.getElementById(mode === 'home' ? 'readerHome' : 'readerInv').style.display = 'none';
+        try { await html5QrCode.stop(); } catch(e) {}
+        try { await html5QrCode.clear(); } catch(e) {}
+        html5QrCode = null;
+      }
+      document.getElementById('scannerOverlay').style.display = 'none';
+      document.getElementById('reader').innerHTML = '';
+    }
+    function handleScanResult(barcode, mode) {
+      stopScanning();
+      const cleanBarcode = String(barcode).trim();
+      const index = products.findIndex(p => p.barcode === cleanBarcode);
+      if (mode === 'sell') {
+        if (index === -1) return alert('यह barcode inventory में नहीं मिला।');
+        const item = products[index];
+        const qtyStr = prompt('"' + item.name + '" कितनी quantity बेचनी है?', '1');
+        if (!qtyStr) return;
+        const q = parseFloat(qtyStr);
+        if (!(q > 0)) return alert('सही quantity डालें।');
+        if (q > item.qty) return alert('Stock कम है।');
+        bill.push({ name: item.name, qty: q, rate: item.selling, total: q * item.selling });
+        item.qty -= q;
+        refreshAll();
+        alert('✅ Bill में add हो गया।');
+        return;
+      }
+      if (index !== -1) {
+        duplicateIndex = index;
+        const item = products[index];
+        document.getElementById('duplicateMessage').textContent = 'ये item पहले से inventory में है: ' + item.name + ' | Stock: ' + item.qty + ' | Rate: ₹' + rupees(item.selling);
+        document.getElementById('duplicateModal').style.display = 'flex';
+      } else {
+        document.getElementById('barcodeInv').value = cleanBarcode;
+        document.getElementById('name').focus();
+        alert('🆕 नया barcode मिला। Name, price और stock भरकर add करें।');
+      }
+    }
+    function closeDuplicateModal() { duplicateIndex = null; document.getElementById('duplicateModal').style.display = 'none'; }
+    function editDuplicateProduct() {
+      if (duplicateIndex === null) return;
+      closeDuplicateModal();
+      openEditModal(duplicateIndex);
+    }
+    function addGroceryToBill() {
+      const name = document.getElementById('groceryName').value.trim();
+      const qty = parseFloat(document.getElementById('groceryQty').value);
+      const rate = parseFloat(document.getElementById('groceryRate').value);
+      if (!name || !(qty > 0) || !(rate > 0)) return alert('सभी details सही भरें।');
+      bill.push({ name, qty, rate, total: qty * rate });
+      document.getElementById('groceryName').value = '';
+      document.getElementById('groceryQty').value = '';
+      document.getElementById('groceryRate').value = '';
+      refreshAll();
+    }
+    function addVegetableToBill() {
+      const name = document.getElementById('vegName').value.trim();
+      const grams = parseFloat(document.getElementById('vegGrams').value);
+      const rate = parseFloat(document.getElementById('vegRateKg').value);
+      if (!name || !(grams > 0) || !(rate > 0)) return alert('सभी details सही भरें।');
+      const amount = (grams / 1000) * rate;
+      bill.push({ name: name + ' (Veg)', qty: grams + 'g', rate, total: amount });
+      document.getElementById('vegName').value = '';
+      document.getElementById('vegGrams').value = '';
+      document.getElementById('vegRateKg').value = '';
+      refreshAll();
+    }
+    function addProduct() {
+      const barcode = document.getElementById('barcodeInv').value.trim() || Date.now().toString();
+      const name = document.getElementById('name').value.trim();
+      const selling = parseFloat(document.getElementById('selling').value) || 0;
+      const qty = parseFloat(document.getElementById('qty').value) || 0;
+      if (!name) return alert('Item name डालें।');
+      const existingIndex = products.findIndex(p => p.barcode === barcode);
+      if (existingIndex !== -1) {
+        duplicateIndex = existingIndex;
+        const item = products[existingIndex];
+        document.getElementById('duplicateMessage').textContent = 'ये item पहले से inventory में है: ' + item.name + ' | Stock: ' + item.qty + ' | Rate: ₹' + rupees(item.selling);
+        document.getElementById('duplicateModal').style.display = 'flex';
+        return;
+      }
+      products.push({ barcode, name, selling, qty });
+      document.getElementById('barcodeInv').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('selling').value = '';
+      document.getElementById('qty').value = '10';
+      refreshAll();
+      alert('Product added successfully.');
+    }
+    function showBill() {
+      const tbody = document.querySelector('#billTable tbody');
+      tbody.innerHTML = '';
+      if (!bill.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">अभी bill खाली है।</td></tr>';
+      } else {
+        bill.forEach((item, i) => {
+          tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td class="amount">₹${rupees(item.rate)}</td><td class="amount">₹${rupees(item.total)}</td><td><button class="icon-btn" onclick="removeFromBill(${i})">Remove</button></td></tr>`;
         });
       }
-
-      barcode = barcode.trim();
-
-      if (mode === 'home') {
-        const item = products.find(p => p.barcode === barcode);
-        if (item) {
-          const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
-          if (qtyStr) {
-            const q = parseFloat(qtyStr);
-            if (q > 0 && q <= item.qty) {
-              bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
-              item.qty -= q;
-              showProducts();
-              showBill();
-              saveData();
-            } else {
-              alert("Stock कम है!");
-            }
-          }
-        } else {
-          alert("यह Barcode Inventory में नहीं मिला!");
-        }
-      } else { // Inventory
-        const item = products.find(p => p.barcode === barcode);
-        if (item) {
-          alert(`✅ Found!\nItem: ${item.name}\nStock: ${item.qty}`);
-        } else {
-          document.getElementById("barcodeInv").value = barcode;
-          document.getElementById("name").focus();
-          alert("🆕 नया Barcode मिला! Name, Rate भरकर Add करें");
-        }
-      }
+      document.getElementById('grandTotal').textContent = rupees(getBillTotal());
+      document.getElementById('billCount').textContent = bill.length;
     }
-
-    function addProduct() {
-      const barcode = document.getElementById("barcodeInv").value.trim();
-      const name = document.getElementById("name").value.trim();
-      const cost = parseFloat(document.getElementById("cost").value) || 0;
-      const selling = parseFloat(document.getElementById("selling").value) || 0;
-      const qty = parseFloat(document.getElementById("qty").value) || 0;
-
-      if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
-
-      const existing = products.find(p => p.barcode === barcode && barcode !== "");
-      if (existing) {
-        existing.qty += qty;
-      } else {
-        products.push({barcode, name, cost, selling, qty});
+    function removeFromBill(i) { bill.splice(i, 1); showBill(); }
+    function clearBill() { if (confirm('Bill clear करें?')) { bill = []; showBill(); } }
+    function filterInventory() {
+      const search = document.getElementById('inventorySearch').value.toLowerCase().trim();
+      const tbody = document.querySelector('#productTable tbody');
+      const filtered = products.filter(p => !search || p.name.toLowerCase().includes(search) || p.barcode.toLowerCase().includes(search));
+      tbody.innerHTML = '';
+      if (!filtered.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">कोई product नहीं मिला।</td></tr>';
+        return;
       }
-
-      showProducts();
-      saveData();
-      document.getElementById("barcodeInv").value = "";
-      document.getElementById("name").value = "";
-      document.getElementById("cost").value = "";
-      document.getElementById("selling").value = "";
-    }
-
-    function showProducts() {
-      const tbody = document.getElementById("productTable").querySelector("tbody");
-      tbody.innerHTML = "";
-      products.forEach((item, i) => {
+      filtered.forEach(p => {
+        const actualIndex = products.findIndex(x => x.barcode === p.barcode);
+        const low = Number(p.qty) < 10;
         tbody.innerHTML += `<tr>
-          <td>${item.barcode || '-'}</td>
-          <td>${item.name}</td>
-          <td>₹${item.selling}</td>
-          <td>${item.qty}</td>
-          <td><button onclick="addToBillFromInventory(${i})" class="success">Bill में जोड़ें</button></td>
+          <td>${p.barcode}</td>
+          <td>${p.name}</td>
+          <td class="amount">₹${rupees(p.selling)}</td>
+          <td>${p.qty}</td>
+          <td>${low ? '<span class="badge badge-low">Low stock</span>' : '<span class="badge badge-ok">In stock</span>'}</td>
+          <td><div class="inline-actions"><button class="icon-btn" onclick="openEditModal(${actualIndex})">Edit</button></div></td>
         </tr>`;
       });
     }
-
-    function addToBillFromInventory(i) {
-      const item = products[i];
-      const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
-      if (!qtyStr) return;
-      const q = parseFloat(qtyStr);
-      if (q <= 0 || q > item.qty) return alert("Stock कम है!");
-      bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
-      item.qty -= q;
-      showProducts();
-      showBill();
-      saveData();
+    function openEditModal(index) {
+      editingIndex = index;
+      const item = products[index];
+      document.getElementById('editBarcode').value = item.barcode;
+      document.getElementById('editName').value = item.name;
+      document.getElementById('editSelling').value = item.selling;
+      document.getElementById('editQty').value = item.qty;
+      document.getElementById('editModal').style.display = 'flex';
     }
-
-    function addGroceryToBill() {
-      const name = document.getElementById("groceryName").value.trim();
-      const qty = parseFloat(document.getElementById("groceryQty").value) || 0;
-      const rate = parseFloat(document.getElementById("groceryRate").value) || 0;
-      if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
-      bill.push({name, qty, rate, total: qty * rate});
-      showBill();
-      saveData();
-      document.getElementById("groceryName").value = "";
-      document.getElementById("groceryQty").value = "";
-      document.getElementById("groceryRate").value = "";
+    function closeEditModal() { editingIndex = null; document.getElementById('editModal').style.display = 'none'; }
+    function saveProductEdit() {
+      if (editingIndex === null) return;
+      const name = document.getElementById('editName').value.trim();
+      const selling = parseFloat(document.getElementById('editSelling').value) || 0;
+      const qty = parseFloat(document.getElementById('editQty').value) || 0;
+      if (!name) return alert('Item name ज़रूरी है।');
+      products[editingIndex].name = name;
+      products[editingIndex].selling = selling;
+      products[editingIndex].qty = qty;
+      closeEditModal();
+      refreshAll();
+      alert('Product updated successfully.');
     }
-
-    function addVegetableToBill() {
-      const name = document.getElementById("vegName").value.trim();
-      const grams = parseFloat(document.getElementById("vegGrams").value) || 0;
-      const rate = parseFloat(document.getElementById("vegRateKg").value) || 0;
-      if (!name || grams <= 0 || rate <= 0) return alert("Sabji, Grams और Rate डालें!");
-      const amount = (grams / 1000) * rate;
-      bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
-      showBill();
-      saveData();
-      document.getElementById("vegName").value = "";
-      document.getElementById("vegGrams").value = "";
-      document.getElementById("vegRateKg").value = "";
+    function deleteEditedProduct() {
+      if (editingIndex === null) return;
+      if (!confirm('इस product को delete करना है?')) return;
+      products.splice(editingIndex, 1);
+      closeEditModal();
+      refreshAll();
+      alert('Product deleted.');
     }
-
-    function showBill() {
-      const tbody = document.getElementById("billTable").querySelector("tbody");
-      tbody.innerHTML = "";
-      let total = 0;
-      bill.forEach((item, i) => {
-        total += item.total || 0;
-        tbody.innerHTML += `<tr>
-          <td>${item.name}</td>
-          <td>${item.qty}</td>
-          <td>₹${item.rate}</td>
-          <td>₹${(item.total || 0).toFixed(2)}</td>
-          <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
-        </tr>`;
-      });
-      document.getElementById("grandTotal").textContent = total.toFixed(2);
-    }
-
-    function removeFromBill(i) {
-      bill.splice(i, 1);
-      showBill();
-      saveData();
-    }
-
-    function clearBill() {
-      if(confirm("Bill Clear करें?")) {
-        bill = [];
-        showBill();
-        saveData();
-      }
-    }
-
-    function printBill() {
-      const printWindow = window.open('', '_blank');
-      const total = bill.reduce((sum, item) => sum + (item.total || 0), 0);
-      let html = `<html><head><title>Bill</title><style>body{font-family:monospace;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid black;padding:8px;}</style></head><body>
-        <h2 style="text-align:center">Chourashiya General Store</h2>
-        <p style="text-align:center">Date: ${new Date().toLocaleDateString('hi-IN')}</p><hr>`;
-      html += `<table><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>`;
-      bill.forEach(item => html += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total.toFixed(2)}</td></tr>`);
-      html += `</table><h3>Grand Total: ₹${total.toFixed(2)}</h3><p style="text-align:center">Thank You 🙏</p><script>window.print();<\/script></body></html>`;
-      printWindow.document.write(html);
-    }
-
-    function exportData() {
-      const data = {products, bill, timestamp: new Date().toISOString()};
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `chourashiya_backup_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    function startVoice() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert("Voice support नहीं है।");
-      // Basic implementation
-      alert("Voice Recognition शुरू हो रहा है... (Demo)");
-    }
-
     function askAI() {
-      const query = document.getElementById("aiQuery").value.trim();
-      const div = document.getElementById("aiResponse");
-      if (!query) return div.innerHTML = "🙋 कुछ पूछिए...";
-      div.innerHTML = "🤖 AI सोच रहा है...";
-      setTimeout(() => {
-        div.innerHTML = `आपने पूछा: "${query}"<br><br>Inventory में खोज रहे हैं...`;
-      }, 600);
+      const q = document.getElementById('aiQuery').value.trim();
+      const total = rupees(getBillTotal());
+      const lowStock = products.filter(p => Number(p.qty) < 10).length;
+      document.getElementById('aiResponse').innerHTML = q
+        ? `🤖 आपने पूछा: <strong>${q}</strong><br><br>Current Bill: ₹${total}<br>Total Products: ${products.length}<br>Low Stock Items: ${lowStock}`
+        : 'कुछ पूछिए...';
     }
-
+    function refreshDashboard() {
+      const inventoryValue = products.reduce((sum, p) => sum + ((Number(p.selling) || 0) * (Number(p.qty) || 0)), 0);
+      const avgPrice = products.length ? products.reduce((sum, p) => sum + (Number(p.selling) || 0), 0) / products.length : 0;
+      document.getElementById('todaySales').textContent = rupees(todaySales);
+      document.getElementById('printedBills').textContent = printedBills;
+      document.getElementById('totalProducts').textContent = products.length;
+      document.getElementById('lowStockCount').textContent = products.filter(p => Number(p.qty) < 10).length;
+      document.getElementById('inventoryValue').textContent = rupees(inventoryValue);
+      document.getElementById('avgPrice').textContent = rupees(avgPrice);
+    }
+    function refreshAll() { showBill(); filterInventory(); refreshDashboard(); }
+    function printBill() {
+      const total = getBillTotal();
+      if (total <= 0) return alert('Bill खाली है।');
+      todaySales += total;
+      printedBills += 1;
+      document.getElementById('printDate').textContent = new Date().toLocaleString('en-IN');
+      document.getElementById('printBillNo').textContent = 'BIL-' + Date.now().toString().slice(-6);
+      const tbody = document.getElementById('printBillItems');
+      tbody.innerHTML = '';
+      bill.forEach(i => {
+        tbody.innerHTML += `<tr><td style="padding:8px;border-bottom:1px solid #ccc;">${i.name}</td><td style="padding:8px;border-bottom:1px solid #ccc;text-align:center;">${i.qty}</td><td style="padding:8px;border-bottom:1px solid #ccc;text-align:right;">₹${rupees(i.rate)}</td><td style="padding:8px;border-bottom:1px solid #ccc;text-align:right;">₹${rupees(i.total)}</td></tr>`;
+      });
+      document.getElementById('printTotal').textContent = rupees(total);
+      document.getElementById('printInvoice').style.display = 'block';
+      window.print();
+      document.getElementById('printInvoice').style.display = 'none';
+      bill = [];
+      refreshAll();
+      switchTab(2);
+    }
+    function exportData() {
+      const payload = { exportedAt: new Date().toISOString(), products, todaySales, printedBills, bill };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chourashiya-backup.json';
+      a.click();
+      URL.revokeObjectURL(url);
+      closeSettings();
+    }
     function clearAllData() {
-      if (confirm("⚠️ सारा Data Delete कर दें?")) {
-        products = []; bill = [];
-        localStorage.clear();
-        showProducts(); showBill();
-        alert("✅ All Data Cleared!");
-      }
+      if (!confirm('सारा data clear करना है?')) return;
+      products = [];
+      bill = [];
+      todaySales = 0;
+      printedBills = 0;
+      closeSettings();
+      refreshAll();
     }
-
-    // Initialize
-    window.onload = () => {
-      loadData();
-      showProducts();
-      showBill();
-    };
+    window.performLogin = performLogin;
+    window.switchTab = switchTab;
+    window.startCameraScan = startCameraScan;
+    window.stopScanning = stopScanning;
+    window.addGroceryToBill = addGroceryToBill;
+    window.addVegetableToBill = addVegetableToBill;
+    window.clearBill = clearBill;
+    window.printBill = printBill;
+    window.addProduct = addProduct;
+    window.askAI = askAI;
+    window.showSettings = showSettings;
+    window.closeSettings = closeSettings;
+    window.toggleTheme = toggleTheme;
+    window.exportData = exportData;
+    window.clearAllData = clearAllData;
+    window.logout = logout;
+    window.filterInventory = filterInventory;
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.saveProductEdit = saveProductEdit;
+    window.deleteEditedProduct = deleteEditedProduct;
+    window.closeDuplicateModal = closeDuplicateModal;
+    window.editDuplicateProduct = editDuplicateProduct;
   </script>
 </body>
 </html>
