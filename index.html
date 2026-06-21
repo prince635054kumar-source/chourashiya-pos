@@ -177,24 +177,26 @@
     }
 
     .camera-controls {
-      background: rgba(0, 0, 0, 0.8);
-      padding: 12px;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 6px 8px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .camera-controls button {
       flex: 1;
-      padding: 12px;
-      font-size: 16px;
+      padding: 10px;
+      font-size: 14px;
     }
 
     .scanner-info {
       color: #fff;
       text-align: center;
-      padding: 12px;
-      background: rgba(0, 0, 0, 0.9);
-      font-size: 14px;
+      padding: 4px 6px;
+      background: rgba(0, 0, 0, 0.95);
+      font-size: 11px;
+      line-height: 1.2;
+      min-height: auto;
     }
 
     #canvas {
@@ -399,12 +401,12 @@
     <!-- Camera View (Full Screen) -->
     <div id="cameraView" class="camera-view">
       <div class="scanner-info">
-        📱 Position barcode in frame - Scanner will auto-detect
+        📱 Position barcode in frame
       </div>
       <video id="videoStream" playsinline autoplay muted></video>
       <canvas id="canvas"></canvas>
       <div class="camera-controls">
-        <button onclick="exitCameraMode()" class="danger">❌ Exit Scanner</button>
+        <button onclick="exitCameraMode()" class="danger">❌ Exit</button>
       </div>
     </div>
 
@@ -1001,7 +1003,7 @@
       renderBillTable();
     }
 
-    // ==================== INIT ====================
+    // ==================== INITIALIZATION ====================
     window.addEventListener('load', () => {
       domCache.init();
       initTheme();
