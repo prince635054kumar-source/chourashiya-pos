@@ -1,15 +1,30 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Chourashiya General Store</title>
-  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;}
     [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;}
+    
     body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
     h1,h2{margin:12px 0;color:var(--text);}
+
+    /* Splash Screen */
+    #splashScreen {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(135deg, #3498db, #27ae60);
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      z-index: 9999; color: white; text-align: center;
+      animation: fadeOut 2.8s forwards 2s;
+    }
+    .store-name { font-size: 2.8rem; font-weight: bold; margin: 10px 0; text-shadow: 0 4px 15px rgba(0,0,0,0.3); }
+    .tagline { font-size: 1.3rem; animation: fadeIn 1.5s ease 0.6s both; }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
     table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
     th,td{padding:12px;border:1px solid var(--border);text-align:left;}
     th{background:var(--primary);color:white;}
@@ -21,35 +36,45 @@
     .ai-section{border:3px solid var(--primary);}
     .total{font-size:1.8em;font-weight:bold;color:var(--success);}
     .flex-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-    .mic-btn{font-size:22px;padding:12px 16px !important;}
+    .mic-btn{font-size:24px;padding:14px 18px !important; transition: all 0.3s;}
+    .mic-btn.listening { background: #e74c3c !important; transform: scale(1.1); }
 
     @media (max-width: 480px) {
+      .store-name { font-size: 2.2rem; }
       input, button {padding:10px; font-size:15px;}
-      .mic-btn {padding:14px 18px !important;}
     }
   </style>
 </head>
 <body>
+
+  <!-- Splash Screen -->
+  <div id="splashScreen">
+    <h1 class="store-name">🏪 Chourashiya</h1>
+    <h1 class="store-name" style="margin-top:-15px;">General Store</h1>
+    <p class="tagline">Smart POS System</p>
+  </div>
+
   <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
 
   <h1>🏪 Chourashiya General Store</h1>
-  <p style="color:#27ae60;font-weight:bold;">🤖 Smart AI POS</p>
+  <p style="color:#27ae60;font-weight:bold;">🤖 Smart POS</p>
+
+  <div class="section" style="background:#fff3cd;">
+    <small>💾 Data Save Mode: <span id="saveStatus">Browser Storage</span></small>
+  </div>
 
   <!-- AI Assistant -->
   <div class="section ai-section">
-    <h2>🤖 AI Assistant</h2>
-    <p>आलू का रेट, potato price, pyaj...</p>
-    
+    <h2>🤖 Voice + AI Assistant</h2>
     <div class="flex-row">
-      <input id="aiQuery" placeholder="कुछ भी पूछें..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
-      <button onclick="startVoice()" class="success mic-btn">🎤</button>
-      <button onclick="askAI()" class="success">Ask</button>
+      <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+      <button onclick="startVoice()" id="micButton" class="success mic-btn">🎤</button>
+      <button onclick="askAI()" class="success">Ask AI</button>
     </div>
-    
-    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:80px;"></div>
+    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:130px;white-space:pre-wrap;"></div>
   </div>
 
-  <!-- Vegetable -->
+  <!-- Vegetable, Inventory, Bill sections same as before -->
   <div class="section">
     <h2>🥕 Vegetable Selling</h2>
     <div class="flex-row">
@@ -60,7 +85,6 @@
     </div>
   </div>
 
-  <!-- Inventory -->
   <div class="section">
     <h2>📦 Inventory</h2>
     <div class="flex-row">
@@ -77,7 +101,6 @@
     <tbody></tbody>
   </table>
 
-  <!-- Bill -->
   <div class="section bill">
     <h2>🛒 Customer Bill</h2>
     <table id="billTable">
@@ -85,26 +108,68 @@
       <tbody></tbody>
     </table>
     <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
-    <button onclick="clearBill()" class="danger" style="width:48%;">Clear</button>
+    <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
     <button onclick="printBill()" class="success" style="width:48%;">Print Bill</button>
+  </div>
+
+  <div style="text-align:center;margin:15px;">
+    <button onclick="clearAllData()" class="danger">🗑️ All Data Clear</button>
   </div>
 
   <script>
     let products = [];
     let bill = [];
+    let recognition = null;
+    let useLocalStorage = true;
 
-    // Inventory
+    // Safe Data Functions
+    function saveData() {
+      if (!useLocalStorage) return;
+      try {
+        localStorage.setItem("chourashiya_products", JSON.stringify(products));
+        localStorage.setItem("chourashiya_bill", JSON.stringify(bill));
+      } catch (e) {
+        console.warn("localStorage not available");
+        useLocalStorage = false;
+        document.getElementById("saveStatus").textContent = "In-Memory Only";
+      }
+    }
+
+    function loadData() {
+      if (!useLocalStorage) return;
+      try {
+        const savedProducts = localStorage.getItem("chourashiya_products");
+        const savedBill = localStorage.getItem("chourashiya_bill");
+        if (savedProducts) products = JSON.parse(savedProducts);
+        if (savedBill) bill = JSON.parse(savedBill);
+      } catch (e) {
+        console.warn("Cannot load from localStorage");
+        useLocalStorage = false;
+        document.getElementById("saveStatus").textContent = "In-Memory Only";
+      }
+    }
+
+    function clearAllData() {
+      if (confirm("⚠️ सारा Data Delete कर दें?")) {
+        products = []; bill = [];
+        if (useLocalStorage) {
+          try { localStorage.clear(); } catch(e){}
+        }
+        showProducts(); showBill();
+        alert("✅ All Data Cleared!");
+      }
+    }
+
+    // Rest of the functions (addProduct, showProducts, etc.) remain same
     function addProduct() {
       const name = document.getElementById("name").value.trim();
       const cost = parseFloat(document.getElementById("cost").value) || 0;
       const selling = parseFloat(document.getElementById("selling").value) || 0;
       const qty = parseFloat(document.getElementById("qty").value) || 0;
-
       if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
-
       products.push({name, cost, selling, qty});
       showProducts();
-
+      saveData();
       document.getElementById("name").value = "";
       document.getElementById("cost").value = "";
       document.getElementById("selling").value = "";
@@ -131,86 +196,136 @@
         const q = parseFloat(qty);
         bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
         showBill();
+        saveData();
       }
     }
 
-    // Smart AI with Voice
-    function askAI() {
-      const query = document.getElementById("aiQuery").value.toLowerCase().trim();
-      processAIQuery(query);
+    function showBill() {
+      const tbody = document.getElementById("billTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      let total = 0;
+      bill.forEach((item, i) => {
+        total += item.total || 0;
+        tbody.innerHTML += `<tr>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>₹${item.rate}</td>
+          <td>₹${(item.total || 0).toFixed(2)}</td>
+          <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
+        </tr>`;
+      });
+      document.getElementById("grandTotal").textContent = total.toFixed(2);
     }
 
+    function removeFromBill(i) { bill.splice(i, 1); showBill(); saveData(); }
+    function clearBill() { if(confirm("Bill Clear करें?")) { bill = []; showBill(); saveData(); } }
+    function printBill() { window.print(); }
+
+    function addVegetableToBill() {
+      const name = document.getElementById("vegName").value.trim();
+      const grams = parseFloat(document.getElementById("vegGrams").value) || 0;
+      const rate = parseFloat(document.getElementById("vegRateKg").value) || 0;
+      if (!name || grams <= 0 || rate <= 0) return alert("Sabji, Grams और Rate डालें!");
+      const amount = (grams / 1000) * rate;
+      bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
+      showBill();
+      saveData();
+      document.getElementById("vegName").value = "";
+      document.getElementById("vegGrams").value = "";
+      document.getElementById("vegRateKg").value = "";
+    }
+
+    // Voice & AI functions (same as previous)
     function startVoice() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert("Voice support नहीं है। Chrome ब्राउज़र इस्तेमाल करें।");
-      
-      const recognition = new SpeechRecognition();
+      if (!SpeechRecognition) return alert("Voice support नहीं है।");
+
+      if (recognition) recognition.stop();
+      recognition = new SpeechRecognition();
       recognition.lang = 'hi-IN';
       recognition.interimResults = false;
-      
+
+      const micBtn = document.getElementById("micButton");
+
       recognition.onstart = () => {
-        document.getElementById("aiResponse").innerHTML = "🎤 बोलिए...";
+        micBtn.classList.add("listening");
+        micBtn.innerHTML = "🔴";
+        document.getElementById("aiResponse").innerHTML = "<b>🎤 सुन रहा हूँ... बोलिए</b>";
       };
-      
-      recognition.onresult = (e) => {
-        const text = e.results[0][0].transcript;
+
+      recognition.onresult = (event) => {
+        const text = event.results[0][0].transcript.trim();
         document.getElementById("aiQuery").value = text;
-        processAIQuery(text.toLowerCase());
+        askAI();
       };
-      
+
       recognition.onerror = () => {
-        document.getElementById("aiResponse").innerHTML = "❌ Voice समझ नहीं आया। दोबारा ट्राई करें।";
+        micBtn.classList.remove("listening");
+        micBtn.innerHTML = "🎤";
+        document.getElementById("aiResponse").innerHTML = "❌ Voice Error! दोबारा ट्राई करें।";
       };
-      
+
+      recognition.onend = () => {
+        micBtn.classList.remove("listening");
+        micBtn.innerHTML = "🎤";
+      };
+
       recognition.start();
     }
 
-    function processAIQuery(query) {
+    function askAI() {
+      let query = document.getElementById("aiQuery").value.trim();
       const div = document.getElementById("aiResponse");
-      if (!query) return div.innerHTML = "कुछ लिखें या बोलें...";
+      if (!query) return div.innerHTML = "🙋 कुछ पूछिए...";
 
-      const found = products.filter(p => {
-        const n = p.name.toLowerCase();
-        return n.includes(query) || query.includes(n) || query.includes(n.split(" ")[0]);
-      });
+      div.innerHTML = "🤖 AI सोच रहा है...";
 
-      if (found.length > 0) {
-        let html = "<b>✅ मिला:</b><br>";
-        found.forEach(item => {
-          html += `• <strong>${item.name}</strong> → ₹${item.selling} 
-                   <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Bill में जोड़ें</button><br>`;
-        });
-        div.innerHTML = html;
-      } else {
-        div.innerHTML = `❌ "${query}" इन्वेंटरी में नहीं मिला।`;
-      }
+      setTimeout(() => {
+        const lower = query.toLowerCase();
+        let response = "";
+
+        const found = products.filter(p => p.name.toLowerCase().includes(lower) || lower.includes(p.name.toLowerCase()));
+
+        if (found.length > 0) {
+          response = "<b>✅ मिला:</b><br>";
+          found.forEach(item => {
+            response += `• <strong>${item.name}</strong> → ₹${item.selling} | Stock: ${item.qty}<br>
+                         <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Bill में जोड़ें</button><br>`;
+          });
+        } else if (lower.includes("total") || lower.includes("कुल")) {
+          const grand = bill.reduce((sum, item) => sum + (item.total || 0), 0);
+          response = `🛒 <b>Grand Total = ₹${grand.toFixed(2)}</b>`;
+        } else {
+          response = `🤔 "${query}" समझ आया, लेकिन exact match नहीं मिला।`;
+        }
+        div.innerHTML = response;
+      }, 600);
     }
 
     function quickAdd(name) {
       const item = products.find(p => p.name === name);
       if (item) {
         const qty = prompt("Quantity?", "1");
-        if (qty) {
+        if (qty && parseFloat(qty) > 0) {
           const q = parseFloat(qty);
           bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
           showBill();
+          saveData();
         }
       }
     }
-
-    // Vegetable, Bill functions
-    function addVegetableToBill() { /* same */ }
-    function showBill() { /* same */ }
-    function removeFromBill(i) { /* same */ }
-    function clearBill() { /* same */ }
-    function printBill() { alert("✅ Bill Saved! Ctrl+P से Print करें"); }
 
     function toggleTheme() {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
     }
 
-    window.onload = () => showProducts();
+    // Initialize
+    window.onload = () => {
+      loadData();
+      showProducts();
+      showBill();
+    };
   </script>
 </body>
 </html>
