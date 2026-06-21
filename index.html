@@ -3,143 +3,198 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#3498db">
   <title>Chourashiya General Store</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;}
     [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;}
     body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
-    h1,h2{color:var(--text);margin:10px 0;}
+    h1,h2{margin:10px 0;color:var(--text);}
     table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-    th,td{padding:14px 8px;border:1px solid var(--border);text-align:left;font-size:15px;}
+    th,td{padding:12px;border:1px solid var(--border);text-align:left;}
     th{background:var(--primary);color:white;}
-    input,button{padding:14px;margin:6px 4px;font-size:16px;border-radius:8px;border:1px solid var(--border);min-height:48px;background:var(--card);color:var(--text);}
-    button{cursor:pointer;font-weight:600;touch-action:manipulation;}
-    .danger{background:var(--danger);color:white;border:none;}
+    input,button{padding:12px;margin:5px;font-size:16px;border-radius:8px;border:1px solid var(--border);}
+    button{cursor:pointer;font-weight:600;}
     .success{background:var(--success);color:white;border:none;}
-    .scanner{border:3px solid var(--primary);padding:15px;margin:15px 0;background:var(--card);border-radius:12px;}
-    .bill{background:var(--card);padding:20px;border:3px solid #2c3e50;margin:20px 0;border-radius:12px;}
-    .veg-section{background:#e8f5e9;padding:15px;border-radius:12px;margin:15px 0;border:2px solid #4caf50;}
-    .ai-section{background:#f0f8ff;padding:15px;border-radius:12px;margin:15px 0;border:2px solid #3498db;}
-    .ai-response{background:var(--card);padding:15px;border-radius:8px;margin-top:10px;min-height:60px;border-left:5px solid var(--primary);}
+    .danger{background:var(--danger);color:white;border:none;}
+    .section{background:var(--card);padding:15px;border-radius:12px;margin:15px 0;}
+    .ai-section{border:3px solid var(--primary);}
     .total{font-size:1.8em;font-weight:bold;color:var(--success);}
-    #reader{max-width:100%;margin:12px auto;border-radius:8px;overflow:hidden;}
-    .low-stock{color:var(--danger);font-weight:bold;}
-    .flex-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-    .theme-toggle{position:fixed;top:15px;right:15px;z-index:1000;background:var(--card);border:none;width:48px;height:48px;border-radius:50%;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
   </style>
 </head>
 <body>
-  <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌙</button>
+  <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
 
   <h1>🏪 Chourashiya General Store</h1>
-  <p style="color:#27ae60;font-weight:bold;">🤖 AI Powered POS</p>
+  <p style="color:#27ae60;font-weight:bold;">🤖 Smart AI POS</p>
 
   <!-- AI Assistant -->
-  <div class="ai-section">
-    <h2>🤖 AI Rate Assistant</h2>
-    <p><strong>पूछें:</strong> potato rate, onion price, tomato kitne ka, sabji list</p>
-    <div class="flex-row">
-      <input id="aiQuery" placeholder="AI se rate पूछें..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
-      <button onclick="askAI()" class="success">Ask AI</button>
+  <div class="section ai-section">
+    <h2>🤖 AI Assistant</h2>
+    <div style="display:flex;gap:8px;">
+      <input id="aiQuery" placeholder="potato rate, onion, tomato..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+      <button onclick="startVoice()" class="success">🎤</button>
+      <button onclick="askAI()" class="success">Ask</button>
     </div>
-    <div id="aiResponse" class="ai-response"></div>
+    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:80px;"></div>
   </div>
 
-  <!-- Scanner, Vegetable, Inventory, Bill sections (shortened for space) -->
-  <div class="scanner">
-    <h2>📸 Barcode Scanner</h2>
-    <button onclick="startScanner()" class="success">Start Scanner</button>
-    <button onclick="stopScanner()" class="danger">Stop Camera</button>
-    <div id="reader"></div>
-  </div>
-
-  <!-- Vegetable -->
-  <div class="veg-section">
-    <h2>🥕 Vegetable Selling</h2>
-    <div class="flex-row">
-      <input id="vegName" placeholder="Sabji Naam" style="flex:1;">
-      <input id="vegWeight" type="number" step="0.01" placeholder="Kg" style="width:100px;">
-      <input id="vegRate" type="number" placeholder="Rate/Kg" style="width:120px;">
-      <button onclick="addVegetableToBill()" class="success">Add to Bill</button>
-    </div>
+  <!-- Vegetable Selling (Grams) -->
+  <div class="section">
+    <h2>🥕 Vegetable Selling (Grams)</h2>
+    <input id="vegName" placeholder="Sabji Naam" style="width:32%;">
+    <input id="vegGrams" type="number" step="1" placeholder="Grams" style="width:110px;">
+    <input id="vegRateKg" type="number" placeholder="Rate per Kg" style="width:130px;">
+    <button onclick="addVegetableToBill()" class="success">Add to Bill</button>
   </div>
 
   <!-- Inventory -->
-  <h2>📦 Inventory</h2>
-  <div class="flex-row">
-    <input id="name" placeholder="Item Name" style="flex:1;">
-    <input id="price" type="number" placeholder="Selling ₹" style="width:120px;">
-    <button onclick="addProduct()" class="success">Add Item</button>
+  <div class="section">
+    <h2>📦 Inventory</h2>
+    <input id="name" placeholder="Item Name" style="width:35%;">
+    <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
+    <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
+    <input id="qty" type="number" value="10" style="width:80px;">
+    <button onclick="addProduct()" class="success">Add to Inventory</button>
   </div>
 
-  <table id="productTable" style="margin-top:15px;">
-    <thead><tr><th>Name</th><th>Cost</th><th>Selling</th><th>Stock</th></tr></thead>
+  <table id="productTable">
+    <thead><tr><th>Name</th><th>Cost</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead>
     <tbody></tbody>
   </table>
 
   <!-- Bill -->
-  <h2>🛒 Customer Bill</h2>
-  <div class="bill">
+  <div class="section bill">
+    <h2>🛒 Customer Bill</h2>
     <table id="billTable">
       <thead><tr><th>Item</th><th>Qty/Kg</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
       <tbody></tbody>
     </table>
-    <p class="total">Grand Total: ₹ <span id="grandTotal">0</span></p>
+    <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
     <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
-    <button onclick="printBill()" class="success" style="width:48%;">Print Bill</button>
+    <button onclick="printBill()" class="success" style="width:48%;">🖨️ Print Bill</button>
   </div>
 
   <script>
-    let products = [], bill = [];
+    let products = [];
+    let bill = [];
 
-    // ==================== AI Assistant (Improved) ====================
-    function askAI() {
-      const query = document.getElementById("aiQuery").value.toLowerCase().trim();
-      const responseDiv = document.getElementById("aiResponse");
-      
-      if (!query) {
-        responseDiv.innerHTML = "Please type something...";
-        return;
-      }
+    // Add to Inventory
+    function addProduct() {
+      const name = document.getElementById("name").value.trim();
+      const cost = parseFloat(document.getElementById("cost").value) || 0;
+      const selling = parseFloat(document.getElementById("selling").value) || 0;
+      const qty = parseFloat(document.getElementById("qty").value) || 0;
 
-      // Smart Search
-      const matches = products.filter(p => 
-        p.name.toLowerCase().includes(query) || 
-        query.includes(p.name.toLowerCase())
-      );
+      if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
 
-      if (matches.length > 0) {
-        let html = "<strong>Found Items:</strong><br>";
-        matches.forEach(item => {
-          html += `• <b>${item.name}</b> → Selling: <span style="color:green;font-weight:bold;">₹${item.selling || item.price}</span><br>`;
-        });
-        responseDiv.innerHTML = html;
-      } else {
-        responseDiv.innerHTML = `❌ <b>${query}</b> inventory में नहीं मिला।<br>पहले Inventory में Add करें।`;
-      }
+      products.push({name, cost, selling, qty});
+      showProducts();
 
-      document.getElementById("aiQuery").value = "";
+      document.getElementById("name").value = "";
+      document.getElementById("cost").value = "";
+      document.getElementById("selling").value = "";
     }
 
-    // Vegetable Function
+    function showProducts() {
+      const tbody = document.getElementById("productTable").querySelector("tbody");
+      tbody.innerHTML = "";
+      products.forEach((item, i) => {
+        tbody.innerHTML += `<tr>
+          <td>${item.name}</td>
+          <td>₹${item.cost}</td>
+          <td>₹${item.selling}</td>
+          <td>${item.qty}</td>
+          <td><button onclick="addToBill(${i})" class="success">Add to Bill</button></td>
+        </tr>`;
+      });
+    }
+
+    function addToBill(i) {
+      const item = products[i];
+      const qty = prompt(`"${item.name}" कितनी Quantity?`, "1");
+      if (qty && parseFloat(qty) > 0) {
+        const q = parseFloat(qty);
+        bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
+        showBill();
+      }
+    }
+
+    // Improved AI
+    function askAI() {
+      const query = document.getElementById("aiQuery").value.toLowerCase().trim();
+      processAIQuery(query);
+    }
+
+    function startVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert("Voice support nahi hai is browser mein");
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'hi-IN';
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById("aiQuery").value = text;
+        processAIQuery(text.toLowerCase());
+      };
+      recognition.start();
+    }
+
+    function processAIQuery(query) {
+      const div = document.getElementById("aiResponse");
+      if (!query) return;
+
+      const found = products.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        query.includes(p.name.toLowerCase().split(" ")[0])
+      );
+
+      if (found.length > 0) {
+        let html = "<b>✅ Found:</b><br>";
+        found.forEach(item => {
+          html += `• <strong>${item.name}</strong> → Selling Rate: <b>₹${item.selling}</b> 
+                   <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Add to Bill</button><br>`;
+        });
+        div.innerHTML = html;
+      } else {
+        div.innerHTML = `❌ "${query}" inventory में नहीं मिला।<br>पहले Inventory में Add करें।`;
+      }
+    }
+
+    function quickAdd(name) {
+      const item = products.find(p => p.name === name);
+      if (item) {
+        const qty = prompt("Quantity?", "1");
+        if (qty) {
+          const q = parseFloat(qty);
+          bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
+          showBill();
+        }
+      }
+    }
+
+    // Vegetable - Grams to Kg Conversion
     function addVegetableToBill() {
       const name = document.getElementById("vegName").value.trim();
-      const weight = parseFloat(document.getElementById("vegWeight").value);
-      const rate = parseFloat(document.getElementById("vegRate").value);
+      const grams = parseFloat(document.getElementById("vegGrams").value);
+      const ratePerKg = parseFloat(document.getElementById("vegRateKg").value);
 
-      if (!name || !weight || !rate) return alert("Sabji, Weight aur Rate भरें");
+      if (!name || !grams || !ratePerKg) return alert("Sabji, Grams और Rate per Kg डालें");
 
-      const amount = weight * rate;
-      bill.push({name: name + " (Sabzi)", qty: weight + " kg", rate: rate, total: amount});
+      const kg = grams / 1000;
+      const amount = kg * ratePerKg;
+
+      bill.push({
+        name: name + " (Sabzi)",
+        qty: grams + " gm",
+        rate: ratePerKg + "/kg",
+        total: amount
+      });
+
       showBill();
 
       document.getElementById("vegName").value = "";
-      document.getElementById("vegWeight").value = "";
-      document.getElementById("vegRate").value = "";
+      document.getElementById("vegGrams").value = "";
+      document.getElementById("vegRateKg").value = "";
     }
 
     function showBill() {
@@ -152,63 +207,37 @@
           <td>${item.name}</td>
           <td>${item.qty}</td>
           <td>₹${item.rate}</td>
-          <td>₹${item.total}</td>
-          <td><button class="danger" onclick="removeFromBill(${i})">×</button></td>
+          <td>₹${item.total.toFixed(2)}</td>
+          <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
         </tr>`;
       });
-      document.getElementById("grandTotal").innerText = grand;
+      document.getElementById("grandTotal").innerText = grand.toFixed(2);
     }
 
     function removeFromBill(i) {
-      if (confirm("Remove this item?")) {
+      if (confirm("Remove?")) {
         bill.splice(i, 1);
         showBill();
       }
     }
 
     function clearBill() {
-      if (confirm("Pura bill clear करें?")) {
+      if (confirm("Clear bill?")) {
         bill = [];
         showBill();
       }
     }
 
     function printBill() {
-      alert("✅ Bill Saved Successfully!\n\nBrowser का Print option (Ctrl + P) इस्तेमाल करें।");
+      alert("✅ Bill Saved!\nCtrl + P से Print करें");
     }
 
     function toggleTheme() {
       const isDark = document.documentElement.getAttribute("data-theme") === "dark";
       document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
-      document.getElementById("themeBtn").textContent = isDark ? "🌙" : "☀️";
     }
 
-    // Placeholder functions
-    function startScanner() { alert("Scanner Mode Activated (Camera support coming soon)"); }
-    function stopScanner() {}
-    function addProduct() {
-      const name = document.getElementById("name").value.trim();
-      const price = parseFloat(document.getElementById("price").value);
-      if (name && price) {
-        products.push({name, cost: price*0.8, selling: price, price: price, qty: 10});
-        showProducts();
-        alert(`✅ ${name} added to inventory!`);
-        document.getElementById("name").value = "";
-        document.getElementById("price").value = "";
-      }
-    }
-
-    function showProducts() {
-      const tbody = document.getElementById("productTable").querySelector("tbody");
-      tbody.innerHTML = "";
-      products.forEach(item => {
-        tbody.innerHTML += `<tr><td>${item.name}</td><td>₹${item.cost||0}</td><td>₹${item.selling||item.price}</td><td>${item.qty}</td></tr>`;
-      });
-    }
-
-    window.onload = () => {
-      showProducts();
-    };
+    window.onload = () => showProducts();
   </script>
 </body>
 </html>
