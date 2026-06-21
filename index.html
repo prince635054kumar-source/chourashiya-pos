@@ -1,22 +1,15 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Chourashiya General Store</title>
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
     :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;}
     [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;}
     body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
-    h1,h2{margin:12px 0;color:var(--text);}
-    #splashScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#3498db,#27ae60);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:white;text-align:center;animation:fadeOut 2.8s forwards 2s;}
-    .store-name{font-size:2.6rem;font-weight:bold;margin:8px 0;text-shadow:0 4px 15px rgba(0,0,0,0.3);}
-    .tagline{font-size:1.3rem;}
-    @keyframes fadeOut{to{opacity:0;visibility:hidden;}}
-    .tabs{display:flex;margin:15px 0;background:var(--card);border-radius:12px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-    .tab{flex:1;padding:14px;text-align:center;font-weight:bold;border-radius:10px;cursor:pointer;}
-    .tab.active{background:var(--primary);color:white;}
+    h1,h2{margin:10px 0;color:var(--text);}
     table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
     th,td{padding:12px;border:1px solid var(--border);text-align:left;}
     th{background:var(--primary);color:white;}
@@ -24,334 +17,227 @@
     button{cursor:pointer;font-weight:600;}
     .success{background:var(--success);color:white;border:none;}
     .danger{background:var(--danger);color:white;border:none;}
-    .section{background:var(--card);padding:15px;border-radius:12px;margin:12px 0;}
+    .section{background:var(--card);padding:15px;border-radius:12px;margin:15px 0;}
     .ai-section{border:3px solid var(--primary);}
-    .total{font-size:1.9em;font-weight:bold;color:var(--success);}
-    .flex-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-    #scannerOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:100000;display:none;flex-direction:column;align-items:center;justify-content:center;color:white;}
-    #scannerFrame{position:relative;width:92%;max-width:420px;height:320px;border:4px solid #00ff00;border-radius:12px;overflow:hidden;box-shadow:0 0 30px rgba(0,255,0,0.5);}
-    #scannerLine{position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(transparent,#ff0000,transparent);animation:scanLine 2.2s linear infinite;}
-    @keyframes scanLine{0%{top:0;}100%{top:100%;}}
-    .settings-btn{position:fixed;top:15px;left:15px;z-index:999;padding:10px 14px;font-size:22px;background:var(--primary);color:white;border:none;border-radius:50%;}
-    .tab-content{display:none;}
-    .tab-content.active{display:block;}
-    .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:100001;}
-    .modal-content{background:var(--card);padding:25px;border-radius:16px;width:90%;max-width:380px;}
+    .total{font-size:1.8em;font-weight:bold;color:var(--success);}
   </style>
 </head>
 <body>
+  <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
 
-  <!-- Login -->
-  <div id="loginScreen">
-    <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#3498db,#27ae60);display:flex;align-items:center;justify-content:center;color:white;z-index:10000;">
-      <div style="background:rgba(255,255,255,0.2);padding:40px 30px;border-radius:16px;text-align:center;max-width:320px;width:90%;">
-        <h1>🔐 Login</h1>
-        <p><strong>Chourashiya General Store</strong></p>
-        <input type="password" id="passwordInput" placeholder="1234" autofocus>
-        <button onclick="performLogin()" style="width:100%;padding:14px;background:white;color:#3498db;font-weight:bold;border:none;border-radius:8px;margin-top:10px;">Login</button>
-      </div>
+  <h1>🏪 Chourashiya General Store</h1>
+  <p style="color:#27ae60;font-weight:bold;">🤖 Smart AI POS</p>
+
+  <!-- AI Assistant -->
+  <div class="section ai-section">
+    <h2>🤖 AI Assistant</h2>
+    <div style="display:flex;gap:8px;">
+      <input id="aiQuery" placeholder="potato rate, onion, tomato..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+      <button onclick="startVoice()" class="success">🎤</button>
+      <button onclick="askAI()" class="success">Ask</button>
     </div>
+    <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:80px;"></div>
   </div>
 
-  <!-- Splash -->
-  <div id="splashScreen" style="display:none;">
-    <h1 class="store-name">🏪 Chourashiya</h1>
-    <h1 class="store-name" style="margin-top:-12px;">General Store</h1>
-    <p class="tagline">Smart POS System</p>
+  <!-- Vegetable Selling (Grams) -->
+  <div class="section">
+    <h2>🥕 Vegetable Selling (Grams)</h2>
+    <input id="vegName" placeholder="Sabji Naam" style="width:32%;">
+    <input id="vegGrams" type="number" step="1" placeholder="Grams" style="width:110px;">
+    <input id="vegRateKg" type="number" placeholder="Rate per Kg" style="width:130px;">
+    <button onclick="addVegetableToBill()" class="success">Add to Bill</button>
   </div>
 
-  <!-- Main App -->
-  <div id="mainApp" style="display:none;">
-    <button onclick="showSettings()" class="settings-btn">⚙️</button>
-
-    <h1 style="text-align:center;">🏪 Chourashiya General Store</h1>
-
-    <div class="tabs">
-      <div class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</div>
-      <div class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</div>
-      <div class="tab" onclick="switchTab(2)" id="tab2">👑 Owner</div>
-    </div>
-
-    <!-- ==================== HOME TAB ==================== -->
-    <div id="content0" class="tab-content active">
-      <div class="section ai-section">
-        <h2>🤖 Smart AI Assistant</h2>
-        <div class="flex-row">
-          <input id="aiQuery" placeholder="Total batao..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
-          <button onclick="askAI()" class="success">Ask</button>
-        </div>
-        <div id="aiResponse" style="margin-top:12px;padding:15px;background:#f0f8ff;border-radius:10px;min-height:130px;"></div>
-      </div>
-
-      <div class="section">
-        <button onclick="startCameraScan('home')" class="success" style="width:100%;padding:16px;font-size:18px;">📸 Scan Barcode (Sell)</button>
-      </div>
-
-      <!-- Grocery Selling -->
-      <div class="section">
-        <h2>🛒 Grocery Selling</h2>
-        <div class="flex-row">
-          <input id="groceryName" placeholder="Item Name" style="flex:1;">
-          <input id="groceryQty" type="number" placeholder="Qty" style="width:90px;">
-          <input id="groceryRate" type="number" placeholder="Rate" style="width:110px;">
-          <button onclick="addGroceryToBill()" class="success">Add to Bill</button>
-        </div>
-      </div>
-
-      <!-- Vegetable Selling -->
-      <div class="section">
-        <h2>🥕 Vegetable Selling</h2>
-        <div class="flex-row">
-          <input id="vegName" placeholder="Sabji Naam" style="flex:1;">
-          <input id="vegGrams" type="number" placeholder="Grams" style="width:110px;">
-          <input id="vegRateKg" type="number" placeholder="Rate/Kg" style="width:130px;">
-          <button onclick="addVegetableToBill()" class="success">Add to Bill</button>
-        </div>
-      </div>
-
-      <!-- Bill -->
-      <div class="section">
-        <h2>🛒 Current Bill</h2>
-        <table id="billTable">
-          <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr></thead>
-          <tbody></tbody>
-        </table>
-        <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
-        <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
-        <button onclick="printBill()" class="success" style="width:48%;">Print Bill</button>
-      </div>
-    </div>
-
-    <!-- INVENTORY TAB -->
-    <div id="content1" class="tab-content">
-      <div class="section">
-        <button onclick="startCameraScan('inventory')" class="success" style="width:100%;padding:16px;">📸 Scan to Add Product</button>
-      </div>
-      <div class="section">
-        <h2>Manual Add Product</h2>
-        <input id="barcodeInv" placeholder="Barcode (Optional)" style="width:100%;">
-        <input id="name" placeholder="Item Name *" style="width:100%;">
-        <div class="flex-row">
-          <input id="selling" type="number" placeholder="Selling Price" style="flex:1;">
-          <input id="qty" type="number" value="10" placeholder="Stock" style="flex:1;">
-        </div>
-        <button onclick="addProduct()" class="success" style="width:100%;padding:16px;font-size:18px;">✅ Add Product</button>
-      </div>
-      <table id="productTable">
-        <thead><tr><th>Name</th><th>Rate</th><th>Stock</th></tr></thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- Owner Dashboard -->
-    <div id="content2" class="tab-content">
-      <div class="section">
-        <h2>👑 Owner Dashboard</h2>
-        <div style="text-align:center;">
-          <div class="total">Today's Sales: ₹<span id="todaySales">2450</span></div>
-        </div>
-      </div>
-    </div>
+  <!-- Inventory -->
+  <div class="section">
+    <h2>📦 Inventory</h2>
+    <input id="name" placeholder="Item Name" style="width:35%;">
+    <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
+    <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
+    <input id="qty" type="number" value="10" style="width:80px;">
+    <button onclick="addProduct()" class="success">Add to Inventory</button>
   </div>
 
-  <!-- Settings Modal -->
-  <div id="settingsModal" class="modal">
-    <div class="modal-content">
-      <h2>⚙️ Settings</h2>
-      <button onclick="toggleTheme()" style="width:100%;padding:14px;margin:8px 0;">🌙 Dark / Light Mode</button>
-      <button onclick="exportData()" class="success" style="width:100%;padding:14px;margin:8px 0;">📤 Export Backup</button>
-      <button onclick="clearAllData()" class="danger" style="width:100%;padding:14px;margin:8px 0;">🗑️ Clear All Data</button>
-      <button onclick="logout()" class="danger" style="width:100%;padding:14px;margin:8px 0;">🚪 Logout</button>
-      <button onclick="closeSettings()" style="width:100%;padding:14px;margin-top:15px;">Close</button>
-    </div>
-  </div>
+  <table id="productTable">
+    <thead><tr><th>Name</th><th>Cost</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead>
+    <tbody></tbody>
+  </table>
 
-  <!-- Scanner -->
-  <div id="scannerOverlay">
-    <div style="margin:20px;font-size:1.2rem;">📸 Scanning...</div>
-    <div id="scannerFrame">
-      <div id="readerHome" style="width:100%;height:100%;"></div>
-      <div id="readerInv" style="width:100%;height:100%;"></div>
-      <div id="scannerLine"></div>
-    </div>
-    <button onclick="stopScanning()" class="danger" style="margin-top:30px;padding:14px 50px;">Cancel</button>
+  <!-- Bill -->
+  <div class="section bill">
+    <h2>🛒 Customer Bill</h2>
+    <table id="billTable">
+      <thead><tr><th>Item</th><th>Qty/Kg</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
+      <tbody></tbody>
+    </table>
+    <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
+    <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
+    <button onclick="printBill()" class="success" style="width:48%;">🖨️ Print Bill</button>
   </div>
 
   <script>
     let products = [];
     let bill = [];
-    let html5QrCode = null;
 
-    function performLogin() {
-      if (document.getElementById("passwordInput").value === "1234") {
-        document.getElementById("loginScreen").style.display = "none";
-        startApp();
-      } else alert("Default Password: 1234");
-    }
-
-    function startApp() {
-      loadData();
-      document.getElementById("splashScreen").style.display = "flex";
-      setTimeout(() => {
-        document.getElementById("splashScreen").style.display = "none";
-        document.getElementById("mainApp").style.display = "block";
-        switchTab(0);
-        showProducts();
-        showBill();
-      }, 1500);
-    }
-
-    function switchTab(n) {
-      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-      document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
-    }
-
-    function showSettings() { document.getElementById("settingsModal").style.display = "flex"; }
-    function closeSettings() { document.getElementById("settingsModal").style.display = "none"; }
-    function toggleTheme() { 
-      const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-      document.documentElement.setAttribute('data-theme', isDark ? '' : 'dark');
-      closeSettings();
-    }
-
-    function startCameraScan(mode) {
-      alert("Scanner Activated (Demo Mode)");
-    }
-    function stopScanning() {
-      document.getElementById("scannerOverlay").style.display = "none";
-    }
-
-    // ====================== MANUAL ADD PRODUCT ======================
+    // Add to Inventory
     function addProduct() {
       const name = document.getElementById("name").value.trim();
-      if (!name) return alert("Item Name डालना जरूरी है!");
-
-      const barcode = document.getElementById("barcodeInv").value.trim() || Date.now().toString();
+      const cost = parseFloat(document.getElementById("cost").value) || 0;
       const selling = parseFloat(document.getElementById("selling").value) || 0;
       const qty = parseFloat(document.getElementById("qty").value) || 0;
 
-      products.push({barcode, name, selling, qty});
+      if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
+
+      products.push({name, cost, selling, qty});
       showProducts();
-      saveData();
 
-      // Clear inputs
       document.getElementById("name").value = "";
-      document.getElementById("barcodeInv").value = "";
+      document.getElementById("cost").value = "";
       document.getElementById("selling").value = "";
-      document.getElementById("qty").value = "10";
-
-      alert(`✅ ${name} Successfully Added!`);
     }
 
     function showProducts() {
-      const tbody = document.querySelector("#productTable tbody");
-      if (!tbody) return;
+      const tbody = document.getElementById("productTable").querySelector("tbody");
       tbody.innerHTML = "";
-      products.forEach(p => {
-        tbody.innerHTML += `<tr><td>${p.name}</td><td>₹${p.selling}</td><td>${p.qty}</td></tr>`;
+      products.forEach((item, i) => {
+        tbody.innerHTML += `<tr>
+          <td>${item.name}</td>
+          <td>₹${item.cost}</td>
+          <td>₹${item.selling}</td>
+          <td>${item.qty}</td>
+          <td><button onclick="addToBill(${i})" class="success">Add to Bill</button></td>
+        </tr>`;
       });
     }
 
-    // Grocery & Vegetable
-    function addGroceryToBill() {
-      const name = document.getElementById("groceryName").value.trim();
-      const qty = parseFloat(document.getElementById("groceryQty").value) || 0;
-      const rate = parseFloat(document.getElementById("groceryRate").value) || 0;
-      if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
-      bill.push({name, qty, rate, total: qty * rate});
-      showBill();
-      document.getElementById("groceryName").value = "";
-      document.getElementById("groceryQty").value = "";
-      document.getElementById("groceryRate").value = "";
+    function addToBill(i) {
+      const item = products[i];
+      const qty = prompt(`"${item.name}" कितनी Quantity?`, "1");
+      if (qty && parseFloat(qty) > 0) {
+        const q = parseFloat(qty);
+        bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
+        showBill();
+      }
     }
 
+    // Improved AI
+    function askAI() {
+      const query = document.getElementById("aiQuery").value.toLowerCase().trim();
+      processAIQuery(query);
+    }
+
+    function startVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert("Voice support nahi hai is browser mein");
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'hi-IN';
+      recognition.onresult = (e) => {
+        const text = e.results[0][0].transcript;
+        document.getElementById("aiQuery").value = text;
+        processAIQuery(text.toLowerCase());
+      };
+      recognition.start();
+    }
+
+    function processAIQuery(query) {
+      const div = document.getElementById("aiResponse");
+      if (!query) return;
+
+      const found = products.filter(p => 
+        p.name.toLowerCase().includes(query) || 
+        query.includes(p.name.toLowerCase().split(" ")[0])
+      );
+
+      if (found.length > 0) {
+        let html = "<b>✅ Found:</b><br>";
+        found.forEach(item => {
+          html += `• <strong>${item.name}</strong> → Selling Rate: <b>₹${item.selling}</b> 
+                   <button onclick="quickAdd('${item.name}')" style="font-size:13px;">Add to Bill</button><br>`;
+        });
+        div.innerHTML = html;
+      } else {
+        div.innerHTML = `❌ "${query}" inventory में नहीं मिला।<br>पहले Inventory में Add करें।`;
+      }
+    }
+
+    function quickAdd(name) {
+      const item = products.find(p => p.name === name);
+      if (item) {
+        const qty = prompt("Quantity?", "1");
+        if (qty) {
+          const q = parseFloat(qty);
+          bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
+          showBill();
+        }
+      }
+    }
+
+    // Vegetable - Grams to Kg Conversion
     function addVegetableToBill() {
       const name = document.getElementById("vegName").value.trim();
-      const grams = parseFloat(document.getElementById("vegGrams").value) || 0;
-      const rate = parseFloat(document.getElementById("vegRateKg").value) || 0;
-      if (!name || grams <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
-      const amount = (grams / 1000) * rate;
-      bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
+      const grams = parseFloat(document.getElementById("vegGrams").value);
+      const ratePerKg = parseFloat(document.getElementById("vegRateKg").value);
+
+      if (!name || !grams || !ratePerKg) return alert("Sabji, Grams और Rate per Kg डालें");
+
+      const kg = grams / 1000;
+      const amount = kg * ratePerKg;
+
+      bill.push({
+        name: name + " (Sabzi)",
+        qty: grams + " gm",
+        rate: ratePerKg + "/kg",
+        total: amount
+      });
+
       showBill();
+
       document.getElementById("vegName").value = "";
       document.getElementById("vegGrams").value = "";
       document.getElementById("vegRateKg").value = "";
     }
 
     function showBill() {
-      const tbody = document.querySelector("#billTable tbody");
-      if (!tbody) return;
+      const tbody = document.getElementById("billTable").querySelector("tbody");
       tbody.innerHTML = "";
-      let total = 0;
-      bill.forEach(item => {
-        total += item.total || 0;
-        tbody.innerHTML += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total.toFixed(2)}</td></tr>`;
+      let grand = 0;
+      bill.forEach((item, i) => {
+        grand += item.total;
+        tbody.innerHTML += `<tr>
+          <td>${item.name}</td>
+          <td>${item.qty}</td>
+          <td>₹${item.rate}</td>
+          <td>₹${item.total.toFixed(2)}</td>
+          <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
+        </tr>`;
       });
-      document.getElementById("grandTotal").textContent = total.toFixed(2);
+      document.getElementById("grandTotal").innerText = grand.toFixed(2);
+    }
+
+    function removeFromBill(i) {
+      if (confirm("Remove?")) {
+        bill.splice(i, 1);
+        showBill();
+      }
     }
 
     function clearBill() {
-      if (confirm("Bill Clear करें?")) {
+      if (confirm("Clear bill?")) {
         bill = [];
         showBill();
       }
     }
 
-    function printBill() { alert("Bill Printed!"); }
-
-    function askAI() {
-      const q = document.getElementById("aiQuery").value.trim();
-      document.getElementById("aiResponse").innerHTML = q ? `🤖 ${q}<br><br>Bill Total: ₹${bill.reduce((s,i)=>s+(i.total||0),0).toFixed(2)}` : "कुछ पूछिए...";
+    function printBill() {
+      alert("✅ Bill Saved!\nCtrl + P से Print करें");
     }
 
-    function saveData() {
-      try {
-        localStorage.setItem('chourashiya_products', JSON.stringify(products));
-        localStorage.setItem('chourashiya_bill', JSON.stringify(bill));
-      } catch(e) {}
+    function toggleTheme() {
+      const isDark = document.documentElement.getAttribute("data-theme") === "dark";
+      document.documentElement.setAttribute("data-theme", isDark ? "" : "dark");
     }
 
-    function loadData() {
-      try {
-        const p = localStorage.getItem('chourashiya_products');
-        if (p) products = JSON.parse(p);
-        const b = localStorage.getItem('chourashiya_bill');
-        if (b) bill = JSON.parse(b);
-      } catch(e) {}
-    }
-
-    function exportData() { alert("Backup Exported!"); }
-    function clearAllData() {
-      if (confirm("सभी डेटा डिलीट करें?")) {
-        localStorage.clear();
-        products = []; bill = [];
-        alert("Data Cleared!");
-      }
-    }
-    function logout() { if(confirm("Logout?")) location.reload(); }
-
-    // Global Functions
-    window.performLogin = performLogin;
-    window.switchTab = switchTab;
-    window.showSettings = showSettings;
-    window.closeSettings = closeSettings;
-    window.toggleTheme = toggleTheme;
-    window.startCameraScan = startCameraScan;
-    window.stopScanning = stopScanning;
-    window.addGroceryToBill = addGroceryToBill;
-    window.addVegetableToBill = addVegetableToBill;
-    window.clearBill = clearBill;
-    window.printBill = printBill;
-    window.addProduct = addProduct;
-    window.askAI = askAI;
-    window.exportData = exportData;
-    window.clearAllData = clearAllData;
-    window.logout = logout;
-
-    window.onload = function() {
-      document.getElementById("loginScreen").style.display = "none";
-      startApp();
-    };
+    window.onload = () => showProducts();
   </script>
 </body>
 </html>
