@@ -1,2 +1,864 @@
-<!DOCTYPE html> <html lang="hi"> <head> <meta charset="UTF-8"> <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> <title>Chourashiya General Store</title> <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script> <style> :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;} [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;} body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;} h1,h2{margin:12px 0;color:var(--text);} #splashScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#3498db,#27ae60);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;color:white;text-align:center;animation:fadeOut 2.8s forwards 2s;} .store-name{font-size:2.6rem;font-weight:bold;margin:8px 0;text-shadow:0 4px 15px rgba(0,0,0,0.3);} .tagline{font-size:1.3rem;} @keyframes fadeOut{to{opacity:0;visibility:hidden;}} .tabs{display:flex;margin:15px 0;background:var(--card);border-radius:12px;padding:6px;box-shadow:0 2px 8px rgba(0,0,0,0.1);} .tab{flex:1;padding:14px;text-align:center;font-weight:bold;border-radius:10px;cursor:pointer;} .tab.active{background:var(--primary);color:white;} table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);} th,td{padding:12px;border:1px solid var(--border);text-align:left;} th{background:var(--primary);color:white;} input,button{padding:12px;margin:5px;font-size:16px;border-radius:8px;border:1px solid var(--border);} button{cursor:pointer;font-weight:600;} .success{background:var(--success);color:white;border:none;} .danger{background:var(--danger);color:white;border:none;} .section{background:var(--card);padding:15px;border-radius:12px;margin:12px 0;} .ai-section{border:3px solid var(--primary);} .total{font-size:1.9em;font-weight:bold;color:var(--success);} .flex-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;} #scannerOverlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:100000;display:none;flex-direction:column;align-items:center;justify-content:center;color:white;} #scannerFrame{position:relative;width:92%;max-width:420px;height:320px;border:4px solid #00ff00;border-radius:12px;overflow:hidden;box-shadow:0 0 30px rgba(0,255,0,0.5);} #scannerLine{position:absolute;top:0;left:0;width:100%;height:4px;background:linear-gradient(transparent,#ff0000,transparent);animation:scanLine 2.2s linear infinite;} @keyframes scanLine{0%{top:0;}100%{top:100%;}} .settings-btn{position:fixed;top:15px;left:15px;z-index:999;padding:10px 14px;font-size:22px;background:var(--primary);color:white;border:none;border-radius:50%;} .logout-btn{position:fixed;top:15px;right:15px;z-index:999;padding:8px 16px;font-size:14px;} .tab-content{display:none;} .tab-content.active{display:block;} .modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:100001;} .modal-content{background:var(--card);padding:25px;border-radius:12px;width:90%;max-width:380px;} </style> </head> <body> <!-- Login Screen --> <div id="loginScreen"> <div style="position:fixed;top:0;left:0;width:100%;height:100%;background:linear-gradient(135deg,#3498db,#27ae60);display:flex;align-items:center;justify-content:center;color:white;z-index:10000;"> <div style="background:rgba(255,255,255,0.2);padding:40px 30px;border-radius:16px;text-align:center;max-width:320px;width:90%;"> <h1>🔐 Login</h1> <p><strong>Chourashiya General Store</strong></p> <input type="password" id="passwordInput" placeholder="1234" autofocus> <button onclick="performLogin()" style="width:100%;padding:14px;background:white;color:#3498db;font-weight:bold;border:none;border-radius:8px;margin-top:10px;">Login</button> </div> </div> </div> <!-- Splash --> <div id="splashScreen" style="display:none;"> <h1 class="store-name">🏪 Chourashiya</h1> <h1 class="store-name" style="margin-top:-12px;">General Store</h1> <p class="tagline">Smart POS System</p> </div> <!-- Main App --> <div id="mainApp" style="display:none;"> <button onclick="showSettings()" class="settings-btn">⚙️</button> <button onclick="logout()" class="danger logout-btn">Logout</button> <h1 style="text-align:center;">🏪 Chourashiya General Store</h1> <div class="tabs"> <div class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</div> <div class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</div> <div class="tab" onclick="switchTab(2)" id="tab2">👑 Owner</div> </div> <!-- HOME TAB --> <div id="content0" class="tab-content active"> <div class="section ai-section"> <h2>🤖 Smart AI Assistant</h2> <div class="flex-row"> <input id="aiQuery" placeholder="Total batao..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()"> <button onclick="askAI()" class="success">Ask</button> </div> <div id="aiResponse" style="margin-top:12px;padding:15px;background:#f0f8ff;border-radius:10px;min-height:130px;"></div> </div> <div class="section"> <button onclick="startCameraScan('home')" class="success" style="width:100%;padding:16px;font-size:18px;">📸 Scan Barcode (Sell)</button> </div> <!-- Grocery & Vegetable --> <div class="section"> <h2>🛒 Grocery Selling</h2> <div class="flex-row"> <input id="groceryName" placeholder="Item Name" style="flex:1;"> <input id="groceryQty" type="number" placeholder="Qty" style="width:90px;"> <input id="groceryRate" type="number" placeholder="Rate" style="width:110px;"> <button onclick="addGroceryToBill()" class="success">Add</button> </div> </div> <div class="section"> <h2>🥕 Vegetable Selling</h2> <div class="flex-row"> <input id="vegName" placeholder="Sabji Naam" style="flex:1;"> <input id="vegGrams" type="number" placeholder="Grams" style="width:110px;"> <input id="vegRateKg" type="number" placeholder="Rate/Kg" style="width:130px;"> <button onclick="addVegetableToBill()" class="success">Add</button> </div> </div> <!-- Bill --> <div class="section"> <h2>🛒 Current Bill</h2> <table id="billTable"> <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th></th></tr></thead> <tbody></tbody> </table> <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p> <button onclick="clearBill()" class="danger" style="width:48%;">Clear</button> <button onclick="printBill()" class="success" style="width:48%;">Print</button> </div> </div> <!-- INVENTORY TAB --> <div id="content1" class="tab-content"> <div class="section"> <button onclick="startCameraScan('inventory')" class="success" style="width:100%;padding:16px;">📸 Scan Barcode (Add Product)</button> </div> <div class="section"> <h2>Manual Add Product</h2> <input id="barcodeInv" placeholder="Barcode" style="width:140px;"> <input id="name" placeholder="Item Name"> <input id="selling" type="number" placeholder="Selling Price"> <input id="qty" type="number" value="10"> <button onclick="addProduct()" class="success">Add Product</button> </div> <table id="productTable"> <thead><tr><th>Name</th><th>Rate</th><th>Stock</th></tr></thead> <tbody></tbody> </table> </div> <!-- OWNER DASHBOARD --> <div id="content2" class="tab-content"> <div class="section"> <h2>👑 Owner Dashboard</h2> <div style="text-align:center;"> <div class="total">Today's Sales: ₹<span id="todaySales">1250</span></div> <div style="font-size:2.5rem;margin:20px 0;" id="totalProducts">12</div> </div> </div> </div> </div> <!-- Scanner Overlay --> <div id="scannerOverlay"> <div style="margin:20px;font-size:1.2rem;">📸 Scanning...</div> <div id="scannerFrame"> <div id="readerHome" style="width:100%;height:100%;"></div> <div id="readerInv" style="width:100%;height:100%;"></div> <div id="scannerLine"></div> </div> <button onclick="stopScanning()" class="danger" style="margin-top:30px;padding:14px 50px;">Cancel Scan</button> </div> <!-- Settings Modal --> <div id="settingsModal" class="modal"> <div class="modal-content"> <h2>⚙️ Settings</h2> <button onclick="toggleTheme()" style="width:100%;margin:8px 0;">🌙 Dark / Light Mode</button> <button onclick="exportData()" class="success" style="width:100%;margin:8px 0;">📤 Export Backup</button> <button onclick="clearAllData()" class="danger" style="width:100%;margin:8px 0;">🗑️ Clear All Data</button> <button onclick="closeSettings()" style="width:100%;margin-top:15px;">Close</button> </div> </div> <script> let products = [ {barcode: "8901234567890", name: "Parle-G Biscuit", selling: 10, qty: 150}, {barcode: "8909876543210", name: "Aashirvaad Atta", selling: 220, qty: 45} ]; let bill = []; let html5QrCode = null; let currentScanMode = null; function performLogin() { if (document.getElementById("passwordInput").value === "1234") { document.getElementById("loginScreen").style.display = "none"; startApp(); } else alert("Default Password: 1234"); } function startApp() { document.getElementById("splashScreen").style.display = "flex"; setTimeout(() => { document.getElementById("splashScreen").style.display = "none"; document.getElementById("mainApp").style.display = "block"; switchTab(0); showProducts(); }, 1800); } function switchTab(n) { document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n)); document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n)); } // ==================== SCANNER ==================== function startCameraScan(mode) { currentScanMode = mode; document.getElementById("scannerOverlay").style.display = "flex"; const readerId = mode === 'home' ? 'readerHome' : 'readerInv'; document.getElementById(readerId).style.display = 'block'; if (html5QrCode) html5QrCode.clear(); html5QrCode = new Html5Qrcode(readerId); html5QrCode.start( { facingMode: "environment" }, { fps: 15, qrbox: { width: 260, height: 260 } }, (decodedText) => handleScanResult(decodedText, mode), () => {} ).catch(err => { alert("Camera Error: " + err); stopScanning(); }); } function stopScanning() { if (html5QrCode) html5QrCode.stop().catch(()=>{}); document.getElementById("scannerOverlay").style.display = "none"; } function handleScanResult(barcode, mode) { stopScanning(); barcode = barcode.trim(); if (mode === 'home') { // Sell Mode const item = products.find(p => p.barcode === barcode); if (item) { const qtyStr = prompt(`"${item.name}" कितनी Quantity बेचनी है?`, "1"); if (qtyStr) { const q = parseFloat(qtyStr); if (q > 0 && q <= item.qty) { bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling}); item.qty -= q; showBill(); showProducts(); alert("✅ Bill में जोड़ा गया!"); } else alert("Stock कम है!"); } } else { alert("यह Barcode Inventory में नहीं मिला!"); } } else { // Inventory Mode - Add Product const existing = products.find(p => p.barcode === barcode); if (existing) { const qtyStr = prompt(`"${existing.name}" का नया Stock?`, existing.qty); if (qtyStr) existing.qty = parseFloat(qtyStr); alert("Stock Updated!"); } else { document.getElementById("barcodeInv").value = barcode; alert("🆕 नया Barcode मिला!\nName और Rate भरकर Add करें"); } showProducts(); } } // Grocery & Vegetable Functions function addGroceryToBill() { const name = document.getElementById("groceryName").value.trim(); const qty = parseFloat(document.getElementById("groceryQty").value) || 0; const rate = parseFloat(document.getElementById("groceryRate").value) || 0; if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!"); bill.push({name, qty, rate, total: qty * rate}); showBill(); document.getElementById("groceryName").value = ""; document.getElementById("groceryQty").value = ""; document.getElementById("groceryRate").value = ""; } function addVegetableToBill() { const name = document.getElementById("vegName").value.trim(); const grams = parseFloat(document.getElementById("vegGrams").value) || 0; const rate = parseFloat(document.getElementById("vegRateKg").value) || 0; if (!name || grams <= 0 || rate <= 0) return alert("सभी डिटेल भरें!"); const amount = (grams / 1000) * rate; bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount}); showBill(); document.getElementById("vegName").value = ""; document.getElementById("vegGrams").value = ""; document.getElementById("vegRateKg").value = ""; } function showBill() { const tbody = document.querySelector("#billTable tbody"); tbody.innerHTML = ""; let total = 0; bill.forEach((item, i) => { total += item.total || 0; tbody.innerHTML += `<tr> <td>${item.name}</td> <td>${item.qty}</td> <td>₹${item.rate}</td> <td>₹${item.total.toFixed(2)}</td> <td><button onclick="removeFromBill(${i})" class="danger">×</button></td> </tr>`; }); document.getElementById("grandTotal").textContent = total.toFixed(2); } function removeFromBill(i) { bill.splice(i, 1); showBill(); } function clearBill() { if (confirm("Bill Clear करें?")) { bill = []; showBill(); } } function printBill() { alert("Bill Printed Successfully!"); } function addProduct() { const barcode = document.getElementById("barcodeInv").value.trim(); const name = document.getElementById("name").value.trim(); if (!name) return alert("Item Name डालें!"); products.push({ barcode: barcode || Date.now().toString(), name: name, selling: parseFloat(document.getElementById("selling").value) || 0, qty: parseFloat(document.getElementById("qty").value) || 0 }); showProducts(); alert("Product Added Successfully!"); } function showProducts() { const tbody = document.querySelector("#productTable tbody"); tbody.innerHTML = ""; products.forEach(p => { tbody.innerHTML += `<tr><td>${p.name}</td><td>₹${p.selling}</td><td>${p.qty}</td></tr>`; }); } function askAI() { const q = document.getElementById("aiQuery").value.trim(); document.getElementById("aiResponse").innerHTML = q ? `🤖 ${q}<br><br>Current Bill: ₹${bill.reduce((s,i)=>s+(i.total||0),0).toFixed(2)}` : "कुछ पूछिए..."; } function showSettings() { document.getElementById("settingsModal").style.display = "flex"; } function closeSettings() { document.getElementById("settingsModal").style.display = "none"; } function toggleTheme() { alert("Theme Changed!"); closeSettings(); } function exportData() { alert("Backup Exported!"); } function clearAllData() { if(confirm("Clear all?")) { products=[]; bill=[]; alert("Cleared!"); } } function logout() { if(confirm("Logout?")) location.reload(); } // Global Functions window.performLogin = performLogin; window.switchTab = switchTab; window.startCameraScan = startCameraScan; window.stopScanning = stopScanning; window.addGroceryToBill = addGroceryToBill; window.addVegetableToBill = addVegetableToBill; window.clearBill = clearBill; window.printBill = printBill; window.addProduct = addProduct; window.askAI = askAI; window.showSettings = showSettings; window.closeSettings = closeSettings; window.toggleTheme = toggleTheme; window.exportData = exportData; window.clearAllData = clearAllData; window.logout = logout; window.onload = function() { document.getElementById("loginScreen").style.display = "none"; startApp(); }; </script> </body> </html>
+<!DOCTYPE html>
+<html lang="hi" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Chourashiya General Store POS</title>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <style>
+    :root, [data-theme="light"] {
+      --font-body: 'Satoshi', system-ui, sans-serif;
+      --font-display: 'Satoshi', system-ui, sans-serif;
+      --text-xs: clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem);
+      --text-sm: clamp(0.875rem, 0.8rem + 0.35vw, 1rem);
+      --text-base: clamp(1rem, 0.95rem + 0.25vw, 1.125rem);
+      --text-lg: clamp(1.125rem, 1rem + 0.75vw, 1.5rem);
+      --text-xl: clamp(1.5rem, 1.2rem + 1.25vw, 2rem);
+      --space-1: 0.25rem; --space-2: 0.5rem; --space-3: 0.75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem; --space-8: 2rem;
+      --color-bg: #f7f6f2;
+      --color-surface: #f9f8f5;
+      --color-surface-2: #fbfbf9;
+      --color-surface-offset: #f3f0ec;
+      --color-border: #d4d1ca;
+      --color-divider: #dcd9d5;
+      --color-text: #28251d;
+      --color-text-muted: #6f6b63;
+      --color-text-faint: #9f9a91;
+      --color-primary: #01696f;
+      --color-primary-hover: #0c4e54;
+      --color-success: #437a22;
+      --color-warning: #964219;
+      --color-error: #a13544;
+      --color-text-inverse: #f9f8f4;
+      --radius-sm: 0.375rem; --radius-md: 0.5rem; --radius-lg: 0.875rem; --radius-xl: 1rem; --radius-full: 9999px;
+      --shadow-sm: 0 1px 2px oklch(0.2 0.01 80 / 0.06);
+      --shadow-md: 0 4px 12px oklch(0.2 0.01 80 / 0.08);
+      --transition-interactive: 180ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    [data-theme="dark"] {
+      --color-bg: #171614;
+      --color-surface: #1c1b19;
+      --color-surface-2: #201f1d;
+      --color-surface-offset: #22211f;
+      --color-border: #393836;
+      --color-divider: #262523;
+      --color-text: #cdccca;
+      --color-text-muted: #9b9995;
+      --color-text-faint: #706e6a;
+      --color-primary: #4f98a3;
+      --color-primary-hover: #227f8b;
+      --color-success: #6daa45;
+      --color-warning: #fdab43;
+      --color-error: #dd6974;
+      --color-text-inverse: #171614;
+      --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.25);
+      --shadow-md: 0 4px 12px oklch(0 0 0 / 0.35);
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+    body {
+      margin: 0; min-height: 100dvh; background: var(--color-bg); color: var(--color-text);
+      font-family: var(--font-body); font-size: var(--text-base); line-height: 1.5;
+    }
+    h1, h2, h3, p { margin: 0; }
+    button, input { font: inherit; }
+    button {
+      border: 0; border-radius: var(--radius-md); min-height: 44px; padding: 0.75rem 1rem; cursor: pointer;
+      transition: background var(--transition-interactive), transform var(--transition-interactive), opacity var(--transition-interactive);
+    }
+    button:active { transform: translateY(1px); }
+    input {
+      width: 100%; min-height: 44px; border-radius: var(--radius-md); border: 1px solid var(--color-border);
+      background: var(--color-surface-2); color: var(--color-text); padding: 0.8rem 0.9rem;
+    }
+    input::placeholder { color: var(--color-text-faint); }
+    .btn-primary { background: var(--color-primary); color: var(--color-text-inverse); }
+    .btn-primary:hover { background: var(--color-primary-hover); }
+    .btn-secondary { background: var(--color-surface-offset); color: var(--color-text); border: 1px solid var(--color-border); }
+    .btn-danger { background: var(--color-error); color: white; }
+    .btn-success { background: var(--color-success); color: white; }
+    .btn-ghost { background: transparent; color: var(--color-text); border: 1px solid var(--color-border); }
+    .app-shell { max-width: 1180px; margin: 0 auto; padding: var(--space-4); }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between; gap: var(--space-3);
+      padding: var(--space-4); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); box-shadow: var(--shadow-sm);
+      position: sticky; top: 0; z-index: 50; margin-bottom: var(--space-4);
+    }
+    .brand { display: flex; align-items: center; gap: 0.85rem; }
+    .logo { width: 42px; height: 42px; color: var(--color-primary); }
+    .brand-title { font-size: var(--text-lg); font-weight: 700; }
+    .muted { color: var(--color-text-muted); font-size: var(--text-sm); }
+    .toolbar { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+    .icon-btn { width: 44px; min-width: 44px; padding: 0; display: grid; place-items: center; }
+    .tabs {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2);
+      background: var(--color-surface); padding: var(--space-2); border-radius: var(--radius-xl); border: 1px solid var(--color-border); margin-bottom: var(--space-4);
+    }
+    .tab { background: transparent; color: var(--color-text-muted); font-weight: 700; }
+    .tab.active { background: var(--color-primary); color: var(--color-text-inverse); }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .grid { display: grid; gap: var(--space-4); }
+    .grid-2 { grid-template-columns: 1fr; }
+    .grid-3 { grid-template-columns: 1fr; }
+    .card {
+      background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl);
+      padding: var(--space-4); box-shadow: var(--shadow-sm); content-visibility: auto;
+    }
+    .card h2 { font-size: var(--text-lg); margin-bottom: var(--space-3); }
+    .form-row { display: grid; gap: var(--space-3); grid-template-columns: 1fr; }
+    .section-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); margin-bottom: var(--space-3); flex-wrap: wrap; }
+    .table-wrap { overflow-x: auto; border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+    table { width: 100%; border-collapse: collapse; min-width: 620px; background: var(--color-surface-2); }
+    th, td { padding: 0.85rem 0.9rem; border-bottom: 1px solid var(--color-divider); text-align: left; font-size: var(--text-sm); }
+    th { background: var(--color-surface-offset); color: var(--color-text); }
+    tr:last-child td { border-bottom: 0; }
+    .amount { font-variant-numeric: tabular-nums; font-weight: 700; }
+    .total-line { font-size: var(--text-lg); font-weight: 700; color: var(--color-success); }
+    .action-row { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .pill { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.35rem 0.65rem; border-radius: var(--radius-full); background: var(--color-surface-offset); font-size: var(--text-xs); }
+    .low-stock { color: var(--color-warning); font-weight: 700; }
+    .kpi-grid { display: grid; gap: var(--space-3); grid-template-columns: repeat(2, 1fr); }
+    .kpi { padding: var(--space-4); background: var(--color-surface-2); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+    .kpi .label { color: var(--color-text-muted); font-size: var(--text-sm); margin-bottom: 0.35rem; }
+    .kpi .value { font-size: var(--text-xl); font-weight: 700; font-variant-numeric: tabular-nums; }
+    .overlay, .modal, .login-screen, .splash-screen {
+      position: fixed; inset: 0; display: none; align-items: center; justify-content: center; z-index: 200;
+    }
+    .login-screen, .splash-screen { background: linear-gradient(135deg, var(--color-primary), var(--color-success)); }
+    .login-card, .modal-card, .scanner-card {
+      width: min(92vw, 420px); background: var(--color-surface); color: var(--color-text);
+      border-radius: var(--radius-xl); border: 1px solid var(--color-border); padding: var(--space-5); box-shadow: var(--shadow-md);
+    }
+    .login-screen.active, .splash-screen.active, .overlay.active, .modal.active { display: flex; }
+    .login-card h1, .splash-title { font-size: var(--text-xl); margin-bottom: var(--space-2); }
+    .splash-card { text-align: center; color: white; }
+    .scanner-card { width: min(94vw, 520px); background: #0d1117; color: white; }
+    #reader { width: 100%; min-height: 280px; border-radius: var(--radius-lg); overflow: hidden; background: #000; }
+    .empty { text-align: center; color: var(--color-text-muted); padding: 1rem; }
+    .print-only { display: none; }
+    @media (max-width: 720px) {
+      .app-shell { padding: 0.75rem; }
+      .topbar { padding: 0.85rem; border-radius: 0.9rem; }
+      .brand-title { font-size: 1.1rem; }
+      .toolbar { width: 100%; justify-content: space-between; }
+      .tabs { grid-template-columns: 1fr 1fr 1fr; gap: 0.45rem; }
+      .tab { min-height: 46px; font-size: 0.92rem; padding: 0.65rem; }
+      .card { padding: 0.9rem; border-radius: 0.9rem; }
+      table { min-width: 720px; }
+      .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .form-row { gap: 0.7rem; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .modal-card, .login-card, .scanner-card { width: min(94vw, 520px); }
+    }
+    @media (min-width: 800px) {
+      .grid-2 { grid-template-columns: 1.2fr 0.8fr; }
+      .grid-3 { grid-template-columns: repeat(3, 1fr); }
+      .form-row { grid-template-columns: repeat(4, 1fr); }
+      .kpi-grid { grid-template-columns: repeat(4, 1fr); }
+    }
+    @media print {
+      html, body { background: #fff !important; }
+      body * { visibility: hidden !important; }
+      #printInvoice, #printInvoice * { visibility: visible !important; }
+      #printInvoice {
+        display: block !important; position: absolute; inset: 0; background: #fff; color: #000; padding: 14mm 10mm;
+        font-family: Arial, sans-serif; font-size: 12px; line-height: 1.45;
+      }
+      #printInvoice h1 { font-size: 20px !important; }
+      #printInvoice table { width: 100%; border-collapse: collapse; }
+      #printInvoice th, #printInvoice td { border-bottom: 1px solid #ddd; padding: 6px 4px; }
+      #printInvoice th { border-bottom: 2px solid #000; }
+      @page { margin: 8mm; }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-screen active" id="loginScreen">
+    <div class="login-card">
+      <h1>🔐 Login</h1>
+      <p class="muted" style="margin-bottom:1rem;">Chourashiya General Store</p>
+      <input id="passwordInput" type="password" placeholder="Password" autofocus>
+      <div class="action-row" style="margin-top:1rem;">
+        <button class="btn-primary" style="flex:1;" onclick="performLogin()">Login</button>
+      </div>
+      <p class="muted" style="margin-top:0.75rem;">Default password: 1234</p>
+    </div>
+  </div>
 
+  <div class="splash-screen" id="splashScreen">
+    <div class="splash-card">
+      <svg class="logo" viewBox="0 0 64 64" aria-label="Chourashiya logo" style="margin:0 auto 1rem auto;color:white;width:76px;height:76px;">
+        <path d="M10 26 32 12l22 14v26H10Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"></path>
+        <path d="M22 52V34h20v18" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"></path>
+        <path d="M18 26h28" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+      </svg>
+      <h1 class="splash-title">Chourashiya General Store</h1>
+      <p>Smart POS System</p>
+    </div>
+  </div>
+
+  <div class="overlay" id="scannerOverlay">
+    <div class="scanner-card">
+      <div class="section-head">
+        <h2>📸 Barcode Scanner</h2>
+        <button class="btn-danger" onclick="stopScanning()">Close</button>
+      </div>
+      <p class="muted" style="color:#cdd3db;margin-bottom:1rem;">Camera permission allow करें और barcode frame में रखें.</p>
+      <div id="reader"></div>
+    </div>
+  </div>
+
+  <div class="modal" id="duplicateWarningModal">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>⚠️ Duplicate Barcode</h2>
+        <button class="btn-ghost" onclick="closeDuplicateWarning()">Close</button>
+      </div>
+      <p class="muted" id="duplicateWarningText" style="margin-bottom:1rem;"></p>
+      <div class="action-row">
+        <button class="btn-primary" style="flex:1;" onclick="openDuplicateEditFromWarning()">Edit Product</button>
+        <button class="btn-secondary" style="flex:1;" onclick="closeDuplicateWarning()">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-card">
+      <div class="section-head">
+        <h2>✏️ Edit Product</h2>
+        <button class="btn-ghost" onclick="closeEditModal()">Close</button>
+      </div>
+      <div class="grid">
+        <input id="editBarcode" placeholder="Barcode" disabled>
+        <input id="editName" placeholder="Item Name">
+        <input id="editSelling" type="number" step="0.01" placeholder="Selling Price">
+        <input id="editQty" type="number" step="0.01" placeholder="Stock Qty">
+        <div class="action-row">
+          <button class="btn-primary" style="flex:1;" onclick="saveProductEdit()">Save Changes</button>
+          <button class="btn-danger" style="flex:1;" onclick="deleteEditedProduct()">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal" id="settingsModal">
+    <div class="modal-card">
+      <h2 style="margin-bottom:1rem;">Settings</h2>
+      <div class="grid">
+        <button class="btn-secondary" onclick="toggleTheme()">🌙 Dark / Light Mode</button>
+        <button class="btn-success" onclick="exportData()">📤 Export Backup</button>
+        <button class="btn-danger" onclick="clearAllData()">🗑️ Clear All Data</button>
+        <button class="btn-ghost" onclick="closeSettings()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-shell" id="mainApp" style="display:none;">
+    <header class="topbar">
+      <div class="brand">
+        <svg class="logo" viewBox="0 0 64 64" aria-label="Chourashiya logo">
+          <path d="M10 26 32 12l22 14v26H10Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"></path>
+          <path d="M22 52V34h20v18" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="round"></path>
+          <path d="M18 26h28" stroke="currentColor" stroke-width="4" stroke-linecap="round"></path>
+        </svg>
+        <div>
+          <div class="brand-title">Chourashiya General Store</div>
+          <div class="muted">Jaipur POS Dashboard</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="icon-btn btn-secondary" data-theme-toggle aria-label="Toggle theme" onclick="toggleTheme()">☾</button>
+        <button class="btn-secondary" onclick="showSettings()">⚙️ Settings</button>
+        <button class="btn-danger" onclick="logout()">Logout</button>
+      </div>
+    </header>
+
+    <nav class="tabs" aria-label="Main sections">
+      <button class="tab active" id="tab0" onclick="switchTab(0)">🏠 Home</button>
+      <button class="tab" id="tab1" onclick="switchTab(1)">📦 Inventory</button>
+      <button class="tab" id="tab2" onclick="switchTab(2)">👑 Owner</button>
+    </nav>
+
+    <main>
+      <section id="content0" class="tab-panel active">
+        <div class="grid grid-2">
+          <div class="grid">
+            <article class="card">
+              <div class="section-head">
+                <h2>🤖 Smart Assistant</h2>
+                <span class="pill">Live bill helper</span>
+              </div>
+              <div class="form-row" style="grid-template-columns:1fr auto;">
+                <input id="aiQuery" placeholder="जैसे: total batao, कितने item हैं" onkeypress="if(event.key==='Enter') askAI()">
+                <button class="btn-primary" onclick="askAI()">Ask</button>
+              </div>
+              <div id="aiResponse" class="card" style="margin-top:1rem;background:var(--color-surface-2);">कुछ पूछिए...</div>
+            </article>
+
+            <article class="card">
+              <div class="section-head">
+                <h2>📸 Quick Sell</h2>
+                <span class="pill">Barcode sell mode</span>
+              </div>
+              <button class="btn-success" style="width:100%;" onclick="startCameraScan('home')">Scan Barcode (Sell)</button>
+            </article>
+
+            <article class="card">
+              <h2>🛒 Grocery Selling</h2>
+              <div class="form-row">
+                <input id="groceryName" placeholder="Item Name">
+                <input id="groceryQty" type="number" step="0.01" placeholder="Qty">
+                <input id="groceryRate" type="number" step="0.01" placeholder="Rate">
+                <button class="btn-success" onclick="addGroceryToBill()">Add</button>
+              </div>
+            </article>
+
+            <article class="card">
+              <h2>🥕 Vegetable Selling</h2>
+              <div class="form-row">
+                <input id="vegName" placeholder="Sabji Naam">
+                <input id="vegGrams" type="number" step="1" placeholder="Grams">
+                <input id="vegRateKg" type="number" step="0.01" placeholder="Rate/Kg">
+                <button class="btn-success" onclick="addVegetableToBill()">Add</button>
+              </div>
+            </article>
+          </div>
+
+          <article class="card">
+            <div class="section-head">
+              <h2>🧾 Current Bill</h2>
+              <span class="pill" id="billCountPill">0 items</span>
+            </div>
+            <div class="table-wrap">
+              <table id="billTable">
+                <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="total-line" style="margin-top:1rem;">Grand Total: ₹<span id="grandTotal">0.00</span></p>
+            <div class="action-row" style="margin-top:1rem;">
+              <button class="btn-danger" style="flex:1;" onclick="clearBill()">Clear</button>
+              <button class="btn-primary" style="flex:1;" onclick="printBill()">Print Bill</button>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="content1" class="tab-panel">
+        <div class="grid">
+          <article class="card">
+            <div class="section-head">
+              <h2>📦 Add by Barcode</h2>
+              <button class="btn-success" onclick="startCameraScan('inventory')">Scan Barcode (Add Product)</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Manual Add Product</h2>
+            <div class="form-row">
+              <input id="barcodeInv" placeholder="Barcode">
+              <input id="name" placeholder="Item Name">
+              <input id="selling" type="number" step="0.01" placeholder="Selling Price">
+              <input id="qty" type="number" step="0.01" value="10" placeholder="Qty">
+            </div>
+            <div class="action-row" style="margin-top:1rem;">
+              <button class="btn-primary" onclick="addProduct()">Add Product</button>
+            </div>
+          </article>
+
+          <article class="card">
+            <div class="section-head">
+              <h2>Inventory List</h2>
+              <input id="inventorySearch" placeholder="Search items..." style="max-width:240px;" oninput="filterInventory()">
+            </div>
+            <div class="table-wrap">
+              <table id="productTable">
+                <thead><tr><th>Barcode</th><th>Name</th><th>Rate</th><th>Stock</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section id="content2" class="tab-panel">
+        <div class="grid">
+          <article class="card">
+            <h2>👑 Owner Dashboard</h2>
+            <div class="kpi-grid" style="margin-top:1rem;">
+              <div class="kpi"><div class="label">Today's Sales</div><div class="value">₹<span id="todaySales">0.00</span></div></div>
+              <div class="kpi"><div class="label">Printed Bills</div><div class="value"><span id="printedBills">0</span></div></div>
+              <div class="kpi"><div class="label">Products</div><div class="value"><span id="totalProducts">0</span></div></div>
+              <div class="kpi"><div class="label">Low Stock</div><div class="value"><span id="lowStockCount">0</span></div></div>
+            </div>
+          </article>
+
+          <article class="card">
+            <h2>Store Summary</h2>
+            <div class="kpi-grid" style="margin-top:1rem;">
+              <div class="kpi"><div class="label">Inventory Value</div><div class="value">₹<span id="inventoryValue">0.00</span></div></div>
+              <div class="kpi"><div class="label">Average Price</div><div class="value">₹<span id="averagePrice">0.00</span></div></div>
+              <div class="kpi"><div class="label">Bill Items</div><div class="value"><span id="dashboardBillItems">0</span></div></div>
+              <div class="kpi"><div class="label">Theme</div><div class="value" id="dashboardTheme">Light</div></div>
+            </div>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="printInvoice" class="print-only">
+    <div style="text-align:center;border-bottom:2px solid #000;padding-bottom:12px;margin-bottom:16px;">
+      <h1 style="margin:0;font-size:24px;">Chourashiya General Store</h1>
+      <p style="margin:4px 0;color:#555;font-size:14px;">Smart POS - Bill Receipt</p>
+      <p style="margin:4px 0;color:#666;font-size:13px;">Date: <span id="printDate"></span></p>
+      <p style="margin:0;color:#666;font-size:13px;">Bill No: <span id="printBillNo"></span></p>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:14px;margin-bottom:16px;">
+      <thead><tr style="border-bottom:1px solid #000;"><th style="padding:8px;text-align:left;">Item</th><th style="padding:8px;text-align:center;">Qty</th><th style="padding:8px;text-align:right;">Rate</th><th style="padding:8px;text-align:right;">Amount</th></tr></thead>
+      <tbody id="printBillItems"></tbody>
+    </table>
+    <div style="border-top:2px solid #000;padding-top:12px;text-align:right;">
+      <p style="margin:0;color:#555;font-size:14px;">Grand Total</p>
+      <p style="margin:4px 0;font-size:20px;font-weight:bold;">₹<span id="printTotal"></span></p>
+    </div>
+    <div style="margin-top:24px;text-align:center;color:#666;font-size:12px;border-top:1px solid #ccc;padding-top:12px;">
+      <p>Thank you for your shopping!</p>
+      <p>Chourashiya General Store - Jaipur, Rajasthan</p>
+    </div>
+  </div>
+
+  <script>
+    let products = [
+      { barcode: '8901234567890', name: 'Parle-G Biscuit', selling: 10, qty: 150 },
+      { barcode: '8909876543210', name: 'Aashirvaad Atta', selling: 220, qty: 45 },
+      { barcode: '8904561237890', name: 'Sugar', selling: 48, qty: 22 },
+      { barcode: '8904561111111', name: 'Potato', selling: 30, qty: 8 }
+    ];
+    let bill = [];
+    let todaySales = 0;
+    let printedBills = 0;
+    let html5QrCode = null;
+    let currentScanMode = null;
+    let themeMode = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    let editingBarcode = null;
+    let duplicateBarcode = null;
+
+    function rupees(value) {
+      return Number(value || 0).toFixed(2);
+    }
+
+    function setTheme(mode) {
+      themeMode = mode;
+      document.documentElement.setAttribute('data-theme', mode);
+      const toggle = document.querySelector('[data-theme-toggle]');
+      if (toggle) toggle.textContent = mode === 'dark' ? '☀' : '☾';
+      document.getElementById('dashboardTheme').textContent = mode === 'dark' ? 'Dark' : 'Light';
+    }
+
+    function toggleTheme() {
+      setTheme(themeMode === 'dark' ? 'light' : 'dark');
+      closeSettings();
+    }
+
+    function performLogin() {
+      const password = document.getElementById('passwordInput').value;
+      if (password === '1234') {
+        document.getElementById('loginScreen').classList.remove('active');
+        startApp();
+      } else {
+        alert('गलत password. Default password: 1234');
+      }
+    }
+
+    function startApp() {
+      setTheme(themeMode);
+      const splash = document.getElementById('splashScreen');
+      splash.classList.add('active');
+      setTimeout(() => {
+        splash.classList.remove('active');
+        document.getElementById('mainApp').style.display = 'block';
+        refreshAll();
+        switchTab(0);
+      }, 1400);
+    }
+
+    function switchTab(n) {
+      document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', i === n));
+      document.querySelectorAll('.tab-panel').forEach((c, i) => c.classList.toggle('active', i === n));
+    }
+
+    function getBillTotal() {
+      return bill.reduce((sum, item) => sum + (Number(item.total) || 0), 0);
+    }
+
+    function showBill() {
+      const tbody = document.querySelector('#billTable tbody');
+      tbody.innerHTML = '';
+      if (!bill.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="empty">Bill अभी खाली है।</td></tr>';
+      } else {
+        bill.forEach((item, i) => {
+          tbody.innerHTML += `<tr>
+            <td>${item.name}</td>
+            <td>${item.qty}</td>
+            <td class="amount">₹${rupees(item.rate)}</td>
+            <td class="amount">₹${rupees(item.total)}</td>
+            <td><button class="btn-danger" onclick="removeFromBill(${i})">×</button></td>
+          </tr>`;
+        });
+      }
+      document.getElementById('grandTotal').textContent = rupees(getBillTotal());
+      document.getElementById('billCountPill').textContent = `${bill.length} items`;
+      document.getElementById('dashboardBillItems').textContent = bill.length;
+    }
+
+    function addGroceryToBill() {
+      const name = document.getElementById('groceryName').value.trim();
+      const qty = parseFloat(document.getElementById('groceryQty').value) || 0;
+      const rate = parseFloat(document.getElementById('groceryRate').value) || 0;
+      if (!name || qty <= 0 || rate <= 0) return alert('सभी डिटेल भरें।');
+      bill.push({ name, qty, rate, total: qty * rate });
+      document.getElementById('groceryName').value = '';
+      document.getElementById('groceryQty').value = '';
+      document.getElementById('groceryRate').value = '';
+      showBill();
+      updateDashboard();
+    }
+
+    function addVegetableToBill() {
+      const name = document.getElementById('vegName').value.trim();
+      const grams = parseFloat(document.getElementById('vegGrams').value) || 0;
+      const rate = parseFloat(document.getElementById('vegRateKg').value) || 0;
+      if (!name || grams <= 0 || rate <= 0) return alert('सभी डिटेल भरें।');
+      const amount = grams / 1000 * rate;
+      bill.push({ name: `${name} (Veg)`, qty: `${grams}g`, rate, total: amount });
+      document.getElementById('vegName').value = '';
+      document.getElementById('vegGrams').value = '';
+      document.getElementById('vegRateKg').value = '';
+      showBill();
+      updateDashboard();
+    }
+
+    function removeFromBill(index) {
+      bill.splice(index, 1);
+      showBill();
+      updateDashboard();
+    }
+
+    function clearBill() {
+      if (confirm('Bill clear करें?')) {
+        bill = [];
+        showBill();
+        updateDashboard();
+      }
+    }
+
+    function openDuplicateWarning(barcode) {
+      const item = products.find(p => p.barcode === barcode);
+      if (!item) return;
+      duplicateBarcode = barcode;
+      document.getElementById('duplicateWarningText').textContent =
+        `यह barcode पहले से मौजूद है: ${item.name} | Stock: ${item.qty} | Rate: ₹${rupees(item.selling)}. चाहें तो अभी edit कर सकते हैं.`;
+      document.getElementById('duplicateWarningModal').classList.add('active');
+    }
+
+    function closeDuplicateWarning() {
+      duplicateBarcode = null;
+      document.getElementById('duplicateWarningModal').classList.remove('active');
+    }
+
+    function openDuplicateEditFromWarning() {
+      if (!duplicateBarcode) return;
+      closeDuplicateWarning();
+      openEditModal(duplicateBarcode);
+    }
+
+    function addProduct() {
+      const barcode = document.getElementById('barcodeInv').value.trim() || Date.now().toString();
+      const name = document.getElementById('name').value.trim();
+      const selling = parseFloat(document.getElementById('selling').value) || 0;
+      const qty = parseFloat(document.getElementById('qty').value) || 0;
+      if (!name) return alert('Item Name डालें।');
+      const existing = products.find(p => p.barcode === barcode);
+      if (existing) {
+        openDuplicateWarning(existing.barcode);
+        return;
+      }
+      products.push({ barcode, name, selling, qty });
+      document.getElementById('barcodeInv').value = '';
+      document.getElementById('name').value = '';
+      document.getElementById('selling').value = '';
+      document.getElementById('qty').value = '10';
+      filterInventory();
+      updateDashboard();
+      alert('Product saved successfully!');
+    }
+
+    function showProducts(list = products) {
+      const tbody = document.querySelector('#productTable tbody');
+      tbody.innerHTML = '';
+      if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="empty">कोई product नहीं है।</td></tr>';
+        return;
+      }
+      list.forEach(p => {
+        const low = Number(p.qty) < 10;
+        tbody.innerHTML += `<tr>
+          <td>${p.barcode}</td>
+          <td>${p.name}</td>
+          <td class="amount">₹${rupees(p.selling)}</td>
+          <td class="${low ? 'low-stock' : ''}">${p.qty}</td>
+          <td>${low ? '<span class="pill">Low stock</span>' : '<span class="pill">In stock</span>'}</td>
+          <td><button class="btn-secondary" onclick="openEditModal('${p.barcode}')">Edit</button></td>
+        </tr>`;
+      });
+    }
+
+    function filterInventory() {
+      const query = document.getElementById('inventorySearch').value.toLowerCase().trim();
+      const filtered = products.filter(p => p.name.toLowerCase().includes(query) || p.barcode.toLowerCase().includes(query));
+      showProducts(filtered);
+    }
+
+    function openEditModal(barcode) {
+      const item = products.find(p => p.barcode === barcode);
+      if (!item) return alert('Product नहीं मिला।');
+      editingBarcode = barcode;
+      document.getElementById('editBarcode').value = item.barcode;
+      document.getElementById('editName').value = item.name;
+      document.getElementById('editSelling').value = item.selling;
+      document.getElementById('editQty').value = item.qty;
+      document.getElementById('editModal').classList.add('active');
+    }
+
+    function closeEditModal() {
+      editingBarcode = null;
+      document.getElementById('editModal').classList.remove('active');
+    }
+
+    function saveProductEdit() {
+      const item = products.find(p => p.barcode === editingBarcode);
+      if (!item) return;
+      const name = document.getElementById('editName').value.trim();
+      const selling = parseFloat(document.getElementById('editSelling').value) || 0;
+      const qty = parseFloat(document.getElementById('editQty').value) || 0;
+      if (!name) return alert('Item name ज़रूरी है।');
+      item.name = name;
+      item.selling = selling;
+      item.qty = qty;
+      closeEditModal();
+      filterInventory();
+      updateDashboard();
+      alert('Product updated successfully.');
+    }
+
+    function deleteEditedProduct() {
+      if (!editingBarcode) return;
+      if (!confirm('यह product delete करना है?')) return;
+      products = products.filter(p => p.barcode !== editingBarcode);
+      closeEditModal();
+      filterInventory();
+      updateDashboard();
+      alert('Product deleted.');
+    }
+
+    function updateDashboard() {
+      const lowStock = products.filter(p => Number(p.qty) < 10).length;
+      const inventoryValue = products.reduce((sum, p) => sum + Number(p.selling) * Number(p.qty), 0);
+      const averagePrice = products.length ? products.reduce((sum, p) => sum + Number(p.selling), 0) / products.length : 0;
+      document.getElementById('todaySales').textContent = rupees(todaySales);
+      document.getElementById('printedBills').textContent = printedBills;
+      document.getElementById('totalProducts').textContent = products.length;
+      document.getElementById('lowStockCount').textContent = lowStock;
+      document.getElementById('inventoryValue').textContent = rupees(inventoryValue);
+      document.getElementById('averagePrice').textContent = rupees(averagePrice);
+      document.getElementById('dashboardBillItems').textContent = bill.length;
+    }
+
+    function askAI() {
+      const q = document.getElementById('aiQuery').value.trim().toLowerCase();
+      const total = getBillTotal();
+      let response = 'कुछ पूछिए...';
+      if (!q) {
+        response = 'कुछ पूछिए...';
+      } else if (q.includes('total')) {
+        response = `Current bill total ₹${rupees(total)} है।`;
+      } else if (q.includes('item')) {
+        response = `Bill में ${bill.length} item हैं।`;
+      } else if (q.includes('stock')) {
+        response = `Inventory में ${products.length} products हैं और ${products.filter(p => Number(p.qty) < 10).length} low stock में हैं।`;
+      } else {
+        response = `आपने पूछा: ${q}. Current bill ₹${rupees(total)} है.`;
+      }
+      document.getElementById('aiResponse').innerHTML = response;
+    }
+
+    function startCameraScan(mode) {
+      currentScanMode = mode;
+      document.getElementById('scannerOverlay').classList.add('active');
+      if (html5QrCode) {
+        html5QrCode.stop().catch(() => {}).finally(() => {
+          html5QrCode.clear().catch(() => {});
+        });
+      }
+      html5QrCode = new Html5Qrcode('reader');
+      html5QrCode.start(
+        { facingMode: 'environment' },
+        { fps: 10, qrbox: { width: 240, height: 240 } },
+        (decodedText) => handleScanResult(decodedText, mode),
+        () => {}
+      ).catch(err => {
+        alert('Camera Error: ' + err);
+        stopScanning();
+      });
+    }
+
+    function stopScanning() {
+      if (html5QrCode) {
+        html5QrCode.stop().catch(() => {}).finally(() => {
+          html5QrCode.clear().catch(() => {});
+        });
+      }
+      document.getElementById('scannerOverlay').classList.remove('active');
+    }
+
+    function handleScanResult(barcode, mode) {
+      stopScanning();
+      barcode = String(barcode).trim();
+      if (mode === 'home') {
+        const item = products.find(p => p.barcode === barcode);
+        if (!item) return alert('यह barcode inventory में नहीं मिला।');
+        const qtyStr = prompt(`"${item.name}" कितनी quantity बेचनी है?`, '1');
+        if (!qtyStr) return;
+        const q = parseFloat(qtyStr);
+        if (q > 0 && q <= item.qty) {
+          bill.push({ name: item.name, qty: q, rate: item.selling, total: q * item.selling });
+          item.qty -= q;
+          showBill();
+          filterInventory();
+          updateDashboard();
+          alert('✅ Bill में जोड़ा गया!');
+        } else {
+          alert('Stock कम है!');
+        }
+      } else {
+        const existing = products.find(p => p.barcode === barcode);
+        if (existing) {
+          openDuplicateWarning(barcode);
+        } else {
+          document.getElementById('barcodeInv').value = barcode;
+          alert('🆕 नया barcode मिला! Name और rate भरकर Add Product करें।');
+        }
+        filterInventory();
+        updateDashboard();
+      }
+    }
+
+    function printBill() {
+      const total = getBillTotal();
+      if (total <= 0) return alert('Bill खाली है।');
+      todaySales += total;
+      printedBills += 1;
+      document.getElementById('printDate').textContent = new Date().toLocaleString('en-IN');
+      document.getElementById('printBillNo').textContent = 'BIL-' + Date.now().toString().slice(-6);
+      const tbody = document.getElementById('printBillItems');
+      tbody.innerHTML = '';
+      bill.forEach(item => {
+        tbody.innerHTML += `<tr>
+          <td style="padding:8px;text-align:left;">${item.name}</td>
+          <td style="padding:8px;text-align:center;">${item.qty}</td>
+          <td style="padding:8px;text-align:right;">₹${rupees(item.rate)}</td>
+          <td style="padding:8px;text-align:right;">₹${rupees(item.total)}</td>
+        </tr>`;
+      });
+      document.getElementById('printTotal').textContent = rupees(total);
+      document.getElementById('printInvoice').style.display = 'block';
+      window.print();
+      document.getElementById('printInvoice').style.display = 'none';
+      bill = [];
+      showBill();
+      updateDashboard();
+      switchTab(2);
+    }
+
+    function exportData() {
+      const data = {
+        store: 'Chourashiya General Store',
+        exportedAt: new Date().toISOString(),
+        todaySales,
+        printedBills,
+        products,
+        currentBill: bill
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'chourashiya-backup.json';
+      a.click();
+      URL.revokeObjectURL(a.href);
+      closeSettings();
+    }
+
+    function clearAllData() {
+      if (!confirm('सारा data clear करना है?')) return;
+      products = [];
+      bill = [];
+      todaySales = 0;
+      printedBills = 0;
+      refreshAll();
+      closeSettings();
+      alert('All data cleared.');
+    }
+
+    function showSettings() { document.getElementById('settingsModal').classList.add('active'); }
+    function closeSettings() { document.getElementById('settingsModal').classList.remove('active'); }
+    function logout() {
+      if (!confirm('Logout करना है?')) return;
+      stopScanning();
+      document.getElementById('mainApp').style.display = 'none';
+      document.getElementById('loginScreen').classList.add('active');
+      document.getElementById('passwordInput').value = '';
+    }
+
+    function refreshAll() {
+      showBill();
+      filterInventory();
+      updateDashboard();
+      document.getElementById('aiResponse').innerHTML = 'कुछ पूछिए...';
+    }
+
+    window.performLogin = performLogin;
+    window.switchTab = switchTab;
+    window.startCameraScan = startCameraScan;
+    window.stopScanning = stopScanning;
+    window.addGroceryToBill = addGroceryToBill;
+    window.addVegetableToBill = addVegetableToBill;
+    window.clearBill = clearBill;
+    window.printBill = printBill;
+    window.addProduct = addProduct;
+    window.askAI = askAI;
+    window.showSettings = showSettings;
+    window.closeSettings = closeSettings;
+    window.toggleTheme = toggleTheme;
+    window.exportData = exportData;
+    window.clearAllData = clearAllData;
+    window.logout = logout;
+    window.filterInventory = filterInventory;
+    window.removeFromBill = removeFromBill;
+    window.openEditModal = openEditModal;
+    window.closeEditModal = closeEditModal;
+    window.saveProductEdit = saveProductEdit;
+    window.deleteEditedProduct = deleteEditedProduct;
+    window.openDuplicateWarning = openDuplicateWarning;
+    window.closeDuplicateWarning = closeDuplicateWarning;
+    window.openDuplicateEditFromWarning = openDuplicateEditFromWarning;
+
+    window.addEventListener('load', () => {
+      setTheme(themeMode);
+    });
+  </script>
+</body>
+</html>
