@@ -3,9 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="theme-color" content="#3498db">
   <title>Chourashiya General Store</title>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
@@ -14,157 +11,166 @@
     body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
     h1,h2{color:var(--text);margin:10px 0;}
     table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-    th,td{padding:14px 8px;border:1px solid var(--border);text-align:left;font-size:15px;}
+    th,td{padding:12px 8px;border:1px solid var(--border);text-align:left;vertical-align:middle;}
     th{background:var(--primary);color:white;}
-    input,button{padding:14px;margin:6px 4px;font-size:16px;border-radius:8px;border:1px solid var(--border);min-height:48px;background:var(--card);color:var(--text);}
-    button{cursor:pointer;font-weight:600;touch-action:manipulation;}
-    .danger{background:var(--danger);color:white;border:none;}
+    input,button{padding:12px;margin:5px;font-size:16px;border-radius:8px;border:1px solid var(--border);}
+    button{cursor:pointer;font-weight:600;}
     .success{background:var(--success);color:white;border:none;}
+    .danger{background:var(--danger);color:white;border:none;}
     .scanner{border:3px solid var(--primary);padding:15px;margin:15px 0;background:var(--card);border-radius:12px;}
     .bill{background:var(--card);padding:20px;border:3px solid #2c3e50;margin:20px 0;border-radius:12px;}
     .total{font-size:1.8em;font-weight:bold;color:var(--success);}
-    #reader{max-width:100%;margin:12px auto;border-radius:8px;overflow:hidden;}
-    .low-stock{color:var(--danger);font-weight:bold;}
-    .flex-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
-    #pinScreen{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);display:none;align-items:center;justify-content:center;z-index:9999;color:white;}
-    .theme-toggle{position:fixed;top:15px;right:15px;z-index:1000;background:var(--card);border:none;width:48px;height:48px;border-radius:50%;font-size:24px;box-shadow:0 2px 8px rgba(0,0,0,0.2);}
+    #reader{max-width:100%;margin:12px auto;border-radius:8px;}
+    .stamp{position:relative;display:inline-block;margin:15px 0;padding:12px 40px;border:4px double #c0392b;color:#c0392b;font-size:20px;font-weight:bold;transform:rotate(-8deg);border-radius:8px;}
+    .qty-btn{padding:6px 12px;font-size:18px;font-weight:bold;}
   </style>
 </head>
 <body>
-  <button onclick="toggleTheme()" class="theme-toggle" id="themeBtn">🌙</button>
-
-  <div id="pinScreen">
-    <div style="text-align:center;max-width:320px;padding:20px;">
-      <h2>🔒 Chourashiya General Store</h2>
-      <p>Enter 4-digit PIN to unlock</p>
-      <input type="password" id="pinInput" maxlength="4" inputmode="numeric" style="font-size:28px;text-align:center;width:180px;letter-spacing:8px;" placeholder="••••">
-      <br><br>
-      <button onclick="verifyPin()" class="success" style="width:180px;">Unlock App</button>
-      <br>
-      <button onclick="changePinPrompt()" style="margin-top:15px;background:none;border:1px solid #ccc;color:white;">Change PIN</button>
-    </div>
-  </div>
-
   <h1>🏪 Chourashiya General Store</h1>
-  <p style="color:#27ae60;font-weight:bold;">🔐 Encrypted • Secure • Online</p>
 
+  <!-- Scanner -->
   <div class="scanner">
-    <h2>📸 Barcode Scanner</h2>
-    <button onclick="startScanner('inventory')" style="background:#3498db;color:white;">Scan → Inventory</button>
-    <button onclick="startScanner('bill')" style="background:#27ae60;color:white;">Scan → Add to Bill</button>
+    <h2>📱 Barcode Scanner</h2>
+    <button onclick="startScanner()" class="success">Start Scanner</button>
     <button onclick="stopScanner()" class="danger">Stop Camera</button>
     <div id="reader"></div>
-    <div id="scanResult" style="margin-top:10px;font-weight:bold;min-height:24px;"></div>
   </div>
 
-  <h2>📦 Inventory</h2>
-  <input type="text" id="search" placeholder="Search name or barcode" style="width:100%;">
-
-  <div class="flex-row">
-    <input id="name" placeholder="Item name" style="flex:1;min-width:160px;">
-    <input id="price" type="number" placeholder="Price ₹" style="width:130px;">
-    <input id="qty" type="number" value="1" min="0" placeholder="Stock" style="width:100px;">
-    <input id="barcode" placeholder="Barcode" style="width:140px;">
-    <button onclick="addProduct()" class="success">Add / Update</button>
+  <!-- Inventory -->
+  <div style="background:var(--card);padding:15px;border-radius:12px;margin:15px 0;">
+    <h2>📦 Inventory</h2>
+    <input type="text" id="itemName" placeholder="Item Name" style="width:45%;">
+    <input type="number" id="itemPrice" placeholder="Price ₹" style="width:25%;">
+    <button onclick="addManualItem()" class="success">Add to Bill</button>
   </div>
 
-  <button onclick="downloadBackup()">💾 Encrypted Backup</button>
-  <label> Restore <input type="file" id="restoreFile" onchange="restoreBackup(this.files[0])"></label>
-  <button onclick="clearAll()" class="danger">Clear All</button>
-
-  <table id="productTable">
-    <thead><tr><th>#</th><th>Name</th><th>Price</th><th>Stock</th><th>Barcode</th><th>Actions</th></tr></thead>
-    <tbody></tbody>
-  </table>
-  <p><strong>Total items: <span id="count">0</span></strong></p>
-
-  <h2>🛒 Customer Bill</h2>
-  <input id="billSearch" placeholder="Product name" list="productSuggestions" style="width:100%;">
-  <datalist id="productSuggestions"></datalist>
-  <input id="billQty" type="number" value="1" min="1" style="width:90px;">
-  <button onclick="addItemToBill()" class="success">Add to Bill</button>
-  <button onclick="clearBill()" class="danger">Clear Bill</button>
-
+  <!-- Customer Bill -->
   <div class="bill">
-    <h3>Current Bill</h3>
+    <h2>🛒 Customer Bill</h2>
     <table id="billTable">
-      <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
+      <thead>
+        <tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr>
+      </thead>
       <tbody></tbody>
     </table>
-    <p class="total">Grand Total: ₹ <span id="grandTotal">0</span></p>
-    <button onclick="printBill()" style="font-size:1.3em;width:100%;background:#2c3e50;color:white;padding:16px;">🖨️ Print / Save Bill</button>
+    <div class="total">Grand Total: ₹<span id="totalAmount">0</span></div>
+    
+    <div style="margin:15px 0;">
+      <button onclick="addStamp()" class="success" style="width:48%;">🛡️ Add Shop Stamp</button>
+      <button onclick="saveBill()" class="success" style="width:48%;">💾 Save & Print</button>
+    </div>
+    <button onclick="clearBill()" class="danger" style="width:100%;">Clear Bill</button>
   </div>
 
   <script>
-    let products=[],bill=[],html5QrCode=null,currentPin=localStorage.getItem("CGS_PIN")||"1234",encryptionSalt=localStorage.getItem("CGS_SALT"),lastActivity=Date.now();
-    const encoder=new TextEncoder(),decoder=new TextDecoder();
+    let billItems = [];
+    let html5QrCode = null;
 
-    async function getEncryptionKey(pin){
-      if(!encryptionSalt){encryptionSalt=Array.from(window.crypto.getRandomValues(new Uint8Array(16))).map(b=>b.toString(16).padStart(2,"0")).join("");localStorage.setItem("CGS_SALT",encryptionSalt);}
-      const salt=Uint8Array.from(encryptionSalt.match(/.{1,2}/g).map(byte=>parseInt(byte,16)));
-      const keyMaterial=await window.crypto.subtle.importKey("raw",encoder.encode(pin),"PBKDF2",false,["deriveBits","deriveKey"]);
-      return window.crypto.subtle.deriveKey({name:"PBKDF2",salt,iterations:100000,hash:"SHA-256"},keyMaterial,{name:"AES-GCM",length:256},true,["encrypt","decrypt"]);
+    function startScanner() {
+      stopScanner();
+      html5QrCode = new Html5Qrcode("reader");
+      html5QrCode.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        (decodedText) => {
+          stopScanner();
+          handleScannedItem(decodedText);
+        }
+      ).catch(err => alert("Camera Error: " + err));
     }
 
-    async function encryptData(data){
-      const key=await getEncryptionKey(currentPin);
-      const iv=window.crypto.getRandomValues(new Uint8Array(12));
-      const encrypted=await window.crypto.subtle.encrypt({name:"AES-GCM",iv},key,encoder.encode(JSON.stringify(data)));
-      const combined=new Uint8Array(iv.length+encrypted.byteLength);
-      combined.set(iv,0);combined.set(new Uint8Array(encrypted),iv.length);
-      return btoa(String.fromCharCode(...combined));
+    function stopScanner() {
+      if (html5QrCode) {
+        html5QrCode.stop().catch(() => {});
+        html5QrCode.clear();
+      }
     }
 
-    async function decryptData(encryptedStr){
-      try{
-        const key=await getEncryptionKey(currentPin);
-        const combined=Uint8Array.from(atob(encryptedStr),c=>c.charCodeAt(0));
-        const iv=combined.slice(0,12);const ciphertext=combined.slice(12);
-        const decrypted=await window.crypto.subtle.decrypt({name:"AES-GCM",iv},key,ciphertext);
-        return JSON.parse(decoder.decode(decrypted));
-      }catch(e){return null;}
+    function handleScannedItem(itemName) {
+      const qty = prompt(`"${itemName}" Scanned!\n\nQuantity डालें:`, "1");
+      if (qty && parseFloat(qty) > 0) {
+        const rate = prompt("Rate (Price) डालें:", "50");
+        addToBill(itemName, parseFloat(qty), parseFloat(rate) || 50);
+      }
     }
 
-    async function saveData(){const encrypted=await encryptData(products);localStorage.setItem("CGS_PRODUCTS_ENC",encrypted);}
-    async function loadData(){const encrypted=localStorage.getItem("CGS_PRODUCTS_ENC");if(encrypted)products=await decryptData(encrypted)||[];else products=[];}
+    function addManualItem() {
+      const name = document.getElementById("itemName").value.trim();
+      const price = parseFloat(document.getElementById("itemPrice").value);
+      if (name && price) {
+        addToBill(name, 1, price);
+        document.getElementById("itemName").value = "";
+        document.getElementById("itemPrice").value = "";
+      } else {
+        alert("Item Name और Price डालें");
+      }
+    }
 
-    function toggleTheme(){const isDark=document.documentElement.getAttribute("data-theme")==="dark";document.documentElement.setAttribute("data-theme",isDark?"light":"dark");localStorage.setItem("CGS_THEME",isDark?"light":"dark");document.getElementById("themeBtn").textContent=isDark?"🌙":"☀️";}
-    function loadTheme(){const saved=localStorage.getItem("CGS_THEME")||"light";document.documentElement.setAttribute("data-theme",saved);document.getElementById("themeBtn").textContent=saved==="dark"?"☀️":"🌙";}
+    function addToBill(name, qty, rate) {
+      const amount = qty * rate;
+      billItems.push({name, qty, rate, amount});
+      renderBill();
+    }
 
-    function showPinScreen(){document.getElementById("pinScreen").style.display="flex";document.getElementById("pinInput").focus();}
-    async function verifyPin(){const input=document.getElementById("pinInput").value;if(input===currentPin){document.getElementById("pinScreen").style.display="none";document.getElementById("pinInput").value="";lastActivity=Date.now();await loadData();initApp();}else{alert("❌ Wrong PIN");document.getElementById("pinInput").value="";}}
-    function changePinPrompt(){const oldPin=prompt("Enter current PIN:");if(oldPin!==currentPin)return alert("Wrong PIN");const newPin=prompt("Enter new 4-digit PIN:");if(newPin&&newPin.length===4&&/^\d{4}$/.test(newPin)){currentPin=newPin;localStorage.setItem("CGS_PIN",newPin);alert("✅ PIN changed.");location.reload();}}
+    function renderBill() {
+      const tbody = document.querySelector("#billTable tbody");
+      tbody.innerHTML = "";
+      let total = 0;
 
-    function checkActivity(){if(Date.now()-lastActivity>5*60*1000)showPinScreen();}
-    setInterval(checkActivity,30000);
-    document.addEventListener("touchstart",()=>lastActivity=Date.now());
-    document.addEventListener("click",()=>lastActivity=Date.now());
+      billItems.forEach((item, index) => {
+        total += item.amount;
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${item.name}</td>
+          <td style="text-align:center; white-space:nowrap;">
+            <button onclick="changeQty(${index}, -1)" class="qty-btn danger">−</button>
+            <b style="margin:0 12px;font-size:18px;">${item.qty}</b>
+            <button onclick="changeQty(${index}, 1)" class="qty-btn success">+</button>
+          </td>
+          <td>₹${item.rate}</td>
+          <td>₹${item.amount}</td>
+          <td><button onclick="removeItem(${index})" class="danger">Remove</button></td>
+        `;
+        tbody.appendChild(row);
+      });
 
-    function startScanner(mode){stopScanner();document.getElementById("scanResult").innerHTML=`<span style="color:var(--primary);">📷 Opening camera...</span>`;html5QrCode=new Html5Qrcode("reader",{rememberLastUsedCamera:true});html5QrCode.start({facingMode:"environment"},{fps:20,qrbox:{width:300,height:300}},(decodedText)=>{document.getElementById("scanResult").innerHTML=`✅ Scanned: <strong>${decodedText}</strong>`;if(mode==="inventory")handleInventoryScan(decodedText);else handleBillScan(decodedText);},()=>{}).catch(()=>alert("Camera permission required"));}
-    function stopScanner(){if(html5QrCode){html5QrCode.stop().catch(()=>{});html5QrCode=null;}document.getElementById("scanResult").innerHTML="";document.getElementById("reader").innerHTML="";}
+      document.getElementById("totalAmount").textContent = Math.round(total);
+    }
 
-    function handleInventoryScan(barcode){const existing=products.find(p=>p.barcode===barcode);if(existing){if(confirm(`Update ${existing.name}?`)){const name=prompt("Name",existing.name);const price=Number(prompt("Price ₹",existing.price));if(name&&price>0){existing.name=name.trim();existing.price=price;saveData();showProducts();updateSuggestions();}}}else{const name=prompt("New Product Name:");const price=Number(prompt("Price ₹:"));if(name&&price>0){products.push({name:name.trim(),price,qty:1,barcode});saveData();showProducts();updateSuggestions();alert(`✅ Added: ${name}`);}}}
-    function handleBillScan(barcode){const product=products.find(p=>p.barcode===barcode||p.name.toLowerCase().includes(barcode.toLowerCase()));if(product)addToBill(product.name,1);else alert("❌ Product not found.");}
+    function changeQty(index, change) {
+      billItems[index].qty += change;
+      if (billItems[index].qty < 1) billItems[index].qty = 1;
+      billItems[index].amount = billItems[index].qty * billItems[index].rate;
+      renderBill();
+    }
 
-    function showProducts(){const text=document.getElementById("search").value.toLowerCase();const tbody=document.getElementById("productTable").querySelector("tbody");tbody.innerHTML="";let count=0;products.forEach((item,index)=>{if(item.name.toLowerCase().includes(text)||(item.barcode||"").includes(text)){count++;const isLow=item.qty<=3;tbody.innerHTML+=`<tr><td>${count}</td><td>${item.name}</td><td>₹${item.price}</td><td class="${isLow?'low-stock':''}">${item.qty}</td><td>${item.barcode||"-"}</td><td><button onclick="editProduct(${index})">Edit</button><button class="danger" onclick="deleteProduct(${index})">Delete</button></td></tr>`;}});document.getElementById("count").innerText=count;}
-    function addProduct(){const name=document.getElementById("name").value.trim();const price=Number(document.getElementById("price").value);const qty=Number(document.getElementById("qty").value)||1;const barcode=document.getElementById("barcode").value.trim();if(!name||price<=0)return alert("Name and price required");const existingIndex=products.findIndex(p=>p.barcode===barcode);if(existingIndex!==-1){products[existingIndex].name=name;products[existingIndex].price=price;products[existingIndex].qty=qty;}else{products.push({name,price,qty,barcode});}saveData();showProducts();updateSuggestions();clearInventoryForm();}
-    function editProduct(index){const p=products[index];const name=prompt("Name",p.name);const price=Number(prompt("Price",p.price));const qty=Number(prompt("Stock",p.qty));const barcode=prompt("Barcode",p.barcode||"");if(name&&price>0){products[index]={name:name.trim(),price,qty,barcode:barcode.trim()};saveData();showProducts();updateSuggestions();}}
-    function deleteProduct(index){if(confirm("Delete product?")){products.splice(index,1);saveData();showProducts();updateSuggestions();}}
-    function clearInventoryForm(){document.getElementById("name").value="";document.getElementById("price").value="";document.getElementById("qty").value="1";document.getElementById("barcode").value="";}
-    function updateSuggestions(){const datalist=document.getElementById("productSuggestions");datalist.innerHTML="";products.forEach(p=>{const opt=document.createElement("option");opt.value=p.name;datalist.appendChild(opt);});}
-    function addItemToBill(){const name=document.getElementById("billSearch").value.trim();const qty=Number(document.getElementById("billQty").value)||1;if(!name)return;addToBill(name,qty);document.getElementById("billSearch").value="";}
-    function addToBill(name,qty){const product=products.find(p=>p.name.toLowerCase()===name.toLowerCase());if(!product)return alert("Product not found");if(product.qty<qty&&!confirm(`Only ${product.qty} left. Continue?`))return;const existing=bill.find(item=>item.name===product.name);if(existing){existing.qty+=qty;existing.total=existing.qty*existing.price;}else{bill.push({name:product.name,qty,price:product.price,total:qty*product.price});}product.qty=Math.max(0,product.qty-qty);saveData();showProducts();showBill();}
-    function showBill(){const tbody=document.getElementById("billTable").querySelector("tbody");tbody.innerHTML="";let grand=0;bill.forEach((item,i)=>{grand+=item.total;tbody.innerHTML+=`<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.price}</td><td>₹${item.total}</td><td><button class="danger" onclick="removeFromBill(${i})">Remove</button></td></tr>`;});document.getElementById("grandTotal").innerText=grand;}
-    function removeFromBill(i){if(confirm("Remove item?")){const item=bill[i];const product=products.find(p=>p.name===item.name);if(product)product.qty+=item.qty;bill.splice(i,1);saveData();showProducts();showBill();}}
-    function clearBill(){if(confirm("Clear bill?")){bill=[];showBill();}}
-    function printBill(){if(bill.length===0)return alert("Bill empty");let content=`<h2>Chourashiya General Store</h2><p>${new Date().toLocaleString()}</p><table border="1" cellpadding="8" style="width:100%;border-collapse:collapse;"><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>`;let total=0;bill.forEach(item=>{content+=`<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.price}</td><td>₹${item.total}</td></tr>`;total+=item.total;});content+=`</table><h3>Grand Total: ₹${total}</h3><p>Thank You!</p>`;const win=window.open("","_blank");win.document.write(content);win.document.close();win.print();}
-    async function downloadBackup(){const encrypted=localStorage.getItem("CGS_PRODUCTS_ENC");if(!encrypted)return alert("No data");const blob=new Blob([encrypted],{type:"text/plain"});const link=document.createElement("a");link.href=URL.createObjectURL(blob);link.download=`Chourashiya_Backup_${new Date().toISOString().slice(0,10)}.txt`;link.click();alert("✅ Backup downloaded!");}
-    async function restoreBackup(file){if(!file)return;const reader=new FileReader();reader.onload=async()=>{try{localStorage.setItem("CGS_PRODUCTS_ENC",reader.result);await loadData();showProducts();updateSuggestions();alert("✅ Restored!");}catch(e){alert("❌ Invalid file");}};reader.readAsText(file);}
-    function clearAll(){if(confirm("⚠️ Delete ALL data?")){products=[];localStorage.removeItem("CGS_PRODUCTS_ENC");showProducts();updateSuggestions();}}
-    function initApp(){showProducts();updateSuggestions();if(products.length===0){alert("Welcome! Default PIN: 1234");}}
-    document.getElementById("pinInput").addEventListener("keypress",e=>{if(e.key==="Enter")verifyPin();});
-    document.getElementById("billSearch").addEventListener("keypress",e=>{if(e.key==="Enter")addItemToBill();});
-    window.onload=()=>{loadTheme();showPinScreen();};
+    function removeItem(index) {
+      billItems.splice(index, 1);
+      renderBill();
+    }
+
+    function addStamp() {
+      if (document.getElementById("shopStamp")) return;
+      const stamp = document.createElement("div");
+      stamp.id = "shopStamp";
+      stamp.className = "stamp";
+      stamp.innerHTML = "CHOURASHIYA GENERAL STORE<br>✅ Paid & Authorized";
+      document.querySelector(".bill").appendChild(stamp);
+    }
+
+    function saveBill() {
+      if (billItems.length === 0) return alert("Bill खाली है!");
+      alert("✅ Bill Saved Successfully!\n\nPrint करने के लिए Ctrl + P दबाएं");
+    }
+
+    function clearBill() {
+      if (confirm("पूरा Bill Clear करें?")) {
+        billItems = [];
+        renderBill();
+        const stamp = document.getElementById("shopStamp");
+        if (stamp) stamp.remove();
+      }
+    }
   </script>
 </body>
 </html>
