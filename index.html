@@ -4,47 +4,219 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Chourashiya General Store</title>
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
   <style>
-    :root{--primary:#3498db;--success:#27ae60;--danger:#e74c3c;--bg:#f4f6f9;--card:#ffffff;--text:#2c3e50;--border:#ddd;}
-    [data-theme="dark"]{--bg:#0f172a;--card:#1e2937;--text:#e2e8f0;--border:#475569;--primary:#60a5fa;}
-   
-    body{font-family:system-ui,-apple-system,sans-serif;margin:0;padding:12px;background:var(--bg);color:var(--text);line-height:1.5;}
-    h1,h2{margin:12px 0;color:var(--text);}
+    :root {
+      --primary: #3498db;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --text: #2c3e50;
+      --border: #ddd;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0f172a;
+      --card: #1e2937;
+      --text: #e2e8f0;
+      --border: #475569;
+      --primary: #60a5fa;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      margin: 0;
+      padding: 12px;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+    }
+
+    h1, h2 { margin: 12px 0; color: var(--text); }
+
     #splashScreen {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
       background: linear-gradient(135deg, #3498db, #27ae60);
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      z-index: 9999; color: white; text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      color: white;
+      text-align: center;
       animation: fadeOut 2.8s forwards 2s;
     }
-    .store-name { font-size: 2.6rem; font-weight: bold; margin: 8px 0; text-shadow: 0 4px 15px rgba(0,0,0,0.3); }
-    .tagline { font-size: 1.3rem; animation: fadeIn 1.5s ease 0.6s both; }
+
+    .store-name {
+      font-size: 2.6rem;
+      font-weight: bold;
+      margin: 8px 0;
+      text-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    }
+
+    .tagline {
+      font-size: 1.3rem;
+      animation: fadeIn 1.5s ease 0.6s both;
+    }
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
-    .tabs { display: flex; margin: 15px 0; background: var(--card); border-radius: 12px; padding: 6px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-    .tab { flex: 1; padding: 14px; text-align: center; font-weight: bold; border-radius: 10px; cursor: pointer; }
+    .theme-toggle {
+      position: fixed;
+      top: 15px;
+      right: 15px;
+      font-size: 24px;
+      z-index: 999;
+      padding: 10px 14px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .tabs {
+      display: flex;
+      margin: 15px 0;
+      background: var(--card);
+      border-radius: 12px;
+      padding: 6px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      gap: 6px;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 14px;
+      text-align: center;
+      font-weight: bold;
+      border-radius: 10px;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text);
+      transition: all 0.3s ease;
+    }
+
+    .tab:hover { opacity: 0.8; }
     .tab.active { background: var(--primary); color: white; }
 
-    table{width:100%;border-collapse:collapse;margin:15px 0;background:var(--card);box-shadow:0 2px 8px rgba(0,0,0,0.1);}
-    th,td{padding:12px;border:1px solid var(--border);text-align:left;}
-    th{background:var(--primary);color:white;}
-    input,button{padding:12px;margin:5px;font-size:16px;border-radius:8px;border:1px solid var(--border);}
-    button{cursor:pointer;font-weight:600;}
-    .success{background:var(--success);color:white;border:none;}
-    .danger{background:var(--danger);color:white;border:none;}
-    .section{background:var(--card);padding:15px;border-radius:12px;margin:12px 0;}
-    .ai-section{border:3px solid var(--primary);}
-    .total{font-size:1.9em;font-weight:bold;color:var(--success);}
-    .flex-row{display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
-    .mic-btn{font-size:24px;padding:14px 18px !important;}
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      background: var(--card);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+    }
+
+    th { background: var(--primary); color: white; }
+
+    input, button {
+      padding: 12px;
+      margin: 5px;
+      font-size: 16px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      color: var(--text);
+    }
+
+    button {
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    button:hover { opacity: 0.9; transform: translateY(-2px); }
+    button.success { background: var(--success); color: white; border: none; }
+    button.danger { background: var(--danger); color: white; border: none; }
+
+    .section {
+      background: var(--card);
+      padding: 15px;
+      border-radius: 12px;
+      margin: 12px 0;
+    }
+
+    .ai-section { border: 3px solid var(--primary); }
+
+    .total {
+      font-size: 1.9em;
+      font-weight: bold;
+      color: var(--success);
+      margin: 15px 0;
+    }
+
+    .flex-row {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .mic-btn {
+      font-size: 24px;
+      padding: 14px 18px !important;
+    }
+
     .mic-btn.listening { background: #e74c3c !important; transform: scale(1.1); }
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    #readerHome, #readerInv { width: 100%; max-width: 400px; margin: 10px auto; border: 3px solid var(--primary); border-radius: 12px; }
+
+    #readerHome, #readerInv {
+      width: 100%;
+      max-width: 400px;
+      margin: 10px auto;
+      border: 3px solid var(--primary);
+      border-radius: 12px;
+    }
+
+    .save-status {
+      background: #fff3cd;
+      font-size: 0.9em;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ai-response {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f0f8ff;
+      border-radius: 8px;
+      min-height: 130px;
+      white-space: pre-wrap;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 15px;
+    }
+
+    .action-buttons button { width: 48%; }
+
+    input[type="number"] { font-variant-numeric: tabular-nums; }
+
+    @media (max-width: 600px) {
+      .action-buttons { flex-direction: column; }
+      .action-buttons button { width: 100%; }
+    }
   </style>
 </head>
 <body>
@@ -55,19 +227,19 @@
     <p class="tagline">Smart POS System</p>
   </div>
 
-  <button onclick="toggleTheme()" style="position:fixed;top:15px;right:15px;font-size:24px;z-index:999;">🌙</button>
+  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
 
   <h1 style="text-align:center;">🏪 Chourashiya General Store</h1>
 
   <!-- Tabs -->
   <div class="tabs">
-    <div class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</div>
-    <div class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</div>
+    <button class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</button>
+    <button class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</button>
   </div>
 
   <!-- ==================== HOME TAB ==================== -->
   <div id="content0" class="tab-content active">
-    <div class="section" style="background:#fff3cd; font-size:0.9em;">
+    <div class="save-status">
       💾 Data Save Mode: <span id="saveStatus">Browser Storage</span>
     </div>
 
@@ -75,11 +247,11 @@
     <div class="section ai-section">
       <h2>🤖 Voice + AI Assistant</h2>
       <div class="flex-row">
-        <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+        <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="handleEnter(event, askAI)">
         <button onclick="startVoice()" id="micButton" class="success mic-btn">🎤</button>
         <button onclick="askAI()" class="success">Ask AI</button>
       </div>
-      <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:130px;white-space:pre-wrap;"></div>
+      <div id="aiResponse" class="ai-response"></div>
     </div>
 
     <!-- Camera Scanner Home -->
@@ -118,9 +290,9 @@
         <tbody></tbody>
       </table>
       <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
-      <div class="flex-row" style="justify-content:center;">
-        <button onclick="clearBill()" class="danger" style="width:48%;">Clear Bill</button>
-        <button onclick="printBill()" class="success" style="width:48%;">🖨️ Print Bill</button>
+      <div class="action-buttons">
+        <button onclick="clearBill()" class="danger">Clear Bill</button>
+        <button onclick="printBill()" class="success">🖨️ Print Bill</button>
       </div>
     </div>
   </div>
@@ -157,30 +329,97 @@
   </div>
 
   <script>
+    // ==================== STATE MANAGEMENT ====================
     let products = [];
     let bill = [];
     let html5QrCode = null;
     let currentMode = null;
+    const STORAGE_KEYS = {
+      products: "chourashiya_products",
+      bill: "chourashiya_bill",
+      theme: "chourashiya_theme"
+    };
 
+    // ==================== DOM CACHE ====================
+    const domCache = {
+      billTableBody: null,
+      productTableBody: null,
+      grandTotalSpan: null,
+      aiResponse: null,
+      aiQuery: null,
+      init() {
+        this.billTableBody = document.getElementById("billTable").querySelector("tbody");
+        this.productTableBody = document.getElementById("productTable").querySelector("tbody");
+        this.grandTotalSpan = document.getElementById("grandTotal");
+        this.aiResponse = document.getElementById("aiResponse");
+        this.aiQuery = document.getElementById("aiQuery");
+      }
+    };
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function handleEnter(event, callback) {
+      if (event.key === 'Enter') callback();
+    }
+
+    function getInputValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function setInputValue(id, value) {
+      document.getElementById(id).value = value;
+    }
+
+    function clearInputValues(ids) {
+      ids.forEach(id => setInputValue(id, ""));
+    }
+
+    function parseNumber(value) {
+      const num = parseFloat(value);
+      return isNaN(num) ? 0 : num;
+    }
+
+    // ==================== STORAGE ====================
     function saveData() {
       try {
-        localStorage.setItem("chourashiya_products", JSON.stringify(products));
-        localStorage.setItem("chourashiya_bill", JSON.stringify(bill));
-      } catch(e){}
+        localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(products));
+        localStorage.setItem(STORAGE_KEYS.bill, JSON.stringify(bill));
+      } catch (e) {
+        console.error("Storage error:", e);
+      }
     }
 
     function loadData() {
       try {
-        const savedProducts = localStorage.getItem("chourashiya_products");
+        const savedProducts = localStorage.getItem(STORAGE_KEYS.products);
         if (savedProducts) products = JSON.parse(savedProducts);
-        const savedBill = localStorage.getItem("chourashiya_bill");
+
+        const savedBill = localStorage.getItem(STORAGE_KEYS.bill);
         if (savedBill) bill = JSON.parse(savedBill);
-      } catch(e){}
+      } catch (e) {
+        console.error("Load error:", e);
+      }
     }
 
+    // ==================== THEME ====================
+    function toggleTheme() {
+      const html = document.documentElement;
+      const isDark = html.getAttribute("data-theme") === "dark";
+      html.setAttribute("data-theme", isDark ? "light" : "dark");
+      localStorage.setItem(STORAGE_KEYS.theme, isDark ? "light" : "dark");
+    }
+
+    function initTheme() {
+      const savedTheme = localStorage.getItem(STORAGE_KEYS.theme) || "light";
+      document.documentElement.setAttribute("data-theme", savedTheme);
+    }
+
+    // ==================== TAB NAVIGATION ====================
     function switchTab(n) {
-      document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', i===n));
-      document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
+      const tabs = document.querySelectorAll('.tab');
+      const contents = document.querySelectorAll('.tab-content');
+
+      tabs.forEach((tab, i) => tab.classList.toggle('active', i === n));
+      contents.forEach((content, i) => content.classList.toggle('active', i === n));
     }
 
     // ==================== CAMERA SCANNER ====================
@@ -188,6 +427,7 @@
       currentMode = mode;
       const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
       const readerDiv = document.getElementById(readerId);
+
       readerDiv.style.display = 'block';
 
       if (html5QrCode) {
@@ -199,9 +439,7 @@
       html5QrCode.start(
         { facingMode: "environment" },
         { fps: 15, qrbox: { width: 280, height: 280 } },
-        (decodedText) => {
-          handleScanResult(decodedText, mode);
-        },
+        (decodedText) => handleScanResult(decodedText, mode),
         (errorMessage) => {}
       ).catch((err) => {
         alert("Camera Start करने में समस्या: " + err);
@@ -209,13 +447,17 @@
       });
     }
 
-    function handleScanResult(barcode, mode) {
+    function stopCameraScan(mode) {
+      const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
       if (html5QrCode) {
         html5QrCode.stop().then(() => {
-          document.getElementById(mode === 'home' ? 'readerHome' : 'readerInv').style.display = 'none';
+          document.getElementById(readerId).style.display = 'none';
         });
       }
+    }
 
+    function handleScanResult(barcode, mode) {
+      stopCameraScan(mode);
       barcode = barcode.trim();
 
       if (mode === 'home') {
@@ -223,12 +465,11 @@
         if (item) {
           const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
           if (qtyStr) {
-            const q = parseFloat(qtyStr);
+            const q = parseNumber(qtyStr);
             if (q > 0 && q <= item.qty) {
               bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
               item.qty -= q;
-              showProducts();
-              showBill();
+              updateUI();
               saveData();
             } else {
               alert("Stock कम है!");
@@ -237,24 +478,25 @@
         } else {
           alert("यह Barcode Inventory में नहीं मिला!");
         }
-      } else { // Inventory
+      } else {
         const item = products.find(p => p.barcode === barcode);
         if (item) {
           alert(`✅ Found!\nItem: ${item.name}\nStock: ${item.qty}`);
         } else {
-          document.getElementById("barcodeInv").value = barcode;
+          setInputValue("barcodeInv", barcode);
           document.getElementById("name").focus();
           alert("🆕 नया Barcode मिला! Name, Rate भरकर Add करें");
         }
       }
     }
 
+    // ==================== PRODUCTS ====================
     function addProduct() {
-      const barcode = document.getElementById("barcodeInv").value.trim();
-      const name = document.getElementById("name").value.trim();
-      const cost = parseFloat(document.getElementById("cost").value) || 0;
-      const selling = parseFloat(document.getElementById("selling").value) || 0;
-      const qty = parseFloat(document.getElementById("qty").value) || 0;
+      const barcode = getInputValue("barcodeInv");
+      const name = getInputValue("name");
+      const cost = parseNumber(document.getElementById("cost").value);
+      const selling = parseNumber(document.getElementById("selling").value);
+      const qty = parseNumber(document.getElementById("qty").value);
 
       if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
 
@@ -265,95 +507,105 @@
         products.push({barcode, name, cost, selling, qty});
       }
 
-      showProducts();
+      updateUI();
       saveData();
-      document.getElementById("barcodeInv").value = "";
-      document.getElementById("name").value = "";
-      document.getElementById("cost").value = "";
-      document.getElementById("selling").value = "";
+      clearInputValues(["barcodeInv", "name", "cost", "selling"]);
+      setInputValue("qty", "10");
     }
 
-    function showProducts() {
-      const tbody = document.getElementById("productTable").querySelector("tbody");
-      tbody.innerHTML = "";
+    function renderProductTable() {
+      domCache.productTableBody.innerHTML = "";
+      const fragment = document.createDocumentFragment();
+
       products.forEach((item, i) => {
-        tbody.innerHTML += `<tr>
+        const row = document.createElement("tr");
+        row.innerHTML = `
           <td>${item.barcode || '-'}</td>
           <td>${item.name}</td>
           <td>₹${item.selling}</td>
           <td>${item.qty}</td>
           <td><button onclick="addToBillFromInventory(${i})" class="success">Bill में जोड़ें</button></td>
-        </tr>`;
+        `;
+        fragment.appendChild(row);
       });
+
+      domCache.productTableBody.appendChild(fragment);
     }
 
     function addToBillFromInventory(i) {
       const item = products[i];
       const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
       if (!qtyStr) return;
-      const q = parseFloat(qtyStr);
+
+      const q = parseNumber(qtyStr);
       if (q <= 0 || q > item.qty) return alert("Stock कम है!");
+
       bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
       item.qty -= q;
-      showProducts();
-      showBill();
+      updateUI();
       saveData();
     }
 
+    // ==================== BILL ====================
     function addGroceryToBill() {
-      const name = document.getElementById("groceryName").value.trim();
-      const qty = parseFloat(document.getElementById("groceryQty").value) || 0;
-      const rate = parseFloat(document.getElementById("groceryRate").value) || 0;
+      const name = getInputValue("groceryName");
+      const qty = parseNumber(document.getElementById("groceryQty").value);
+      const rate = parseNumber(document.getElementById("groceryRate").value);
+
       if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
+
       bill.push({name, qty, rate, total: qty * rate});
-      showBill();
+      updateUI();
       saveData();
-      document.getElementById("groceryName").value = "";
-      document.getElementById("groceryQty").value = "";
-      document.getElementById("groceryRate").value = "";
+      clearInputValues(["groceryName", "groceryQty", "groceryRate"]);
     }
 
     function addVegetableToBill() {
-      const name = document.getElementById("vegName").value.trim();
-      const grams = parseFloat(document.getElementById("vegGrams").value) || 0;
-      const rate = parseFloat(document.getElementById("vegRateKg").value) || 0;
+      const name = getInputValue("vegName");
+      const grams = parseNumber(document.getElementById("vegGrams").value);
+      const rate = parseNumber(document.getElementById("vegRateKg").value);
+
       if (!name || grams <= 0 || rate <= 0) return alert("Sabji, Grams और Rate डालें!");
+
       const amount = (grams / 1000) * rate;
       bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
-      showBill();
+      updateUI();
       saveData();
-      document.getElementById("vegName").value = "";
-      document.getElementById("vegGrams").value = "";
-      document.getElementById("vegRateKg").value = "";
+      clearInputValues(["vegName", "vegGrams", "vegRateKg"]);
     }
 
-    function showBill() {
-      const tbody = document.getElementById("billTable").querySelector("tbody");
-      tbody.innerHTML = "";
+    function renderBillTable() {
+      domCache.billTableBody.innerHTML = "";
+      const fragment = document.createDocumentFragment();
       let total = 0;
+
       bill.forEach((item, i) => {
         total += item.total || 0;
-        tbody.innerHTML += `<tr>
+        const row = document.createElement("tr");
+        row.innerHTML = `
           <td>${item.name}</td>
           <td>${item.qty}</td>
           <td>₹${item.rate}</td>
           <td>₹${(item.total || 0).toFixed(2)}</td>
           <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
-        </tr>`;
+        `;
+        fragment.appendChild(row);
       });
-      document.getElementById("grandTotal").textContent = total.toFixed(2);
+
+      domCache.billTableBody.appendChild(fragment);
+      domCache.grandTotalSpan.textContent = total.toFixed(2);
     }
 
     function removeFromBill(i) {
       bill.splice(i, 1);
-      showBill();
+      updateUI();
       saveData();
     }
 
     function clearBill() {
-      if(confirm("Bill Clear करें?")) {
+      if (confirm("Bill Clear करें?")) {
         bill = [];
-        showBill();
+        updateUI();
         saveData();
       }
     }
@@ -361,56 +613,119 @@
     function printBill() {
       const printWindow = window.open('', '_blank');
       const total = bill.reduce((sum, item) => sum + (item.total || 0), 0);
+
       let html = `<html><head><title>Bill</title><style>body{font-family:monospace;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid black;padding:8px;}</style></head><body>
         <h2 style="text-align:center">Chourashiya General Store</h2>
-        <p style="text-align:center">Date: ${new Date().toLocaleDateString('hi-IN')}</p><hr>`;
-      html += `<table><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>`;
-      bill.forEach(item => html += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total.toFixed(2)}</td></tr>`);
+        <p style="text-align:center">Date: ${new Date().toLocaleDateString('hi-IN')}</p><hr>
+        <table><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>`;
+
+      bill.forEach(item => {
+        html += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total.toFixed(2)}</td></tr>`;
+      });
+
       html += `</table><h3>Grand Total: ₹${total.toFixed(2)}</h3><p style="text-align:center">Thank You 🙏</p><script>window.print();<\/script></body></html>`;
       printWindow.document.write(html);
     }
 
+    // ==================== DATA EXPORT/IMPORT ====================
     function exportData() {
       const data = {products, bill, timestamp: new Date().toISOString()};
       const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `chourashiya_backup_${new Date().toISOString().slice(0,10)}.json`;
-      a.click();
-    }
-
-    function startVoice() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert("Voice support नहीं है।");
-      // Basic implementation
-      alert("Voice Recognition शुरू हो रहा है... (Demo)");
-    }
-
-    function askAI() {
-      const query = document.getElementById("aiQuery").value.trim();
-      const div = document.getElementById("aiResponse");
-      if (!query) return div.innerHTML = "🙋 कुछ पूछिए...";
-      div.innerHTML = "🤖 AI सोच रहा है...";
-      setTimeout(() => {
-        div.innerHTML = `आपने पूछा: "${query}"<br><br>Inventory में खोज रहे हैं...`;
-      }, 600);
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `chourashiya_backup_${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+      link.remove();
     }
 
     function clearAllData() {
       if (confirm("⚠️ सारा Data Delete कर दें?")) {
-        products = []; bill = [];
+        products = [];
+        bill = [];
         localStorage.clear();
-        showProducts(); showBill();
+        updateUI();
         alert("✅ All Data Cleared!");
       }
     }
 
-    // Initialize
-    window.onload = () => {
+    // ==================== AI ASSISTANT ====================
+    function startVoice() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return alert("Voice support नहीं है।");
+
+      const recognition = new SpeechRecognition();
+      const micBtn = document.getElementById("micButton");
+
+      recognition.lang = 'hi-IN';
+      recognition.start();
+      micBtn.classList.add('listening');
+
+      recognition.onresult = (event) => {
+        let transcript = '';
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          transcript += event.results[i][0].transcript;
+        }
+        domCache.aiQuery.value = transcript;
+      };
+
+      recognition.onend = () => {
+        micBtn.classList.remove('listening');
+      };
+
+      recognition.onerror = (event) => {
+        console.error("Speech error:", event.error);
+        micBtn.classList.remove('listening');
+      };
+    }
+
+    function askAI() {
+      const query = domCache.aiQuery.value.trim();
+      if (!query) {
+        domCache.aiResponse.innerHTML = "🙋 कुछ पूछिए...";
+        return;
+      }
+
+      domCache.aiResponse.innerHTML = "🤖 AI सोच रहा है...";
+
+      setTimeout(() => {
+        let response = `आपने पूछा: "${query}"\n\n`;
+
+        if (query.toLowerCase().includes('total') || query.toLowerCase().includes('तोल')) {
+          const total = bill.reduce((sum, item) => sum + (item.total || 0), 0);
+          response += `📊 Current Bill Total: ₹${total.toFixed(2)}\n`;
+        }
+
+        if (query.toLowerCase().includes('stock') || query.toLowerCase().includes('स्टॉक')) {
+          response += `📦 Stock Items:\n`;
+          products.forEach(p => {
+            response += `• ${p.name}: ${p.qty} units\n`;
+          });
+        }
+
+        if (query.toLowerCase().includes('rate') || query.toLowerCase().includes('रेट')) {
+          response += `💰 Product Rates:\n`;
+          products.slice(0, 5).forEach(p => {
+            response += `• ${p.name}: ₹${p.selling}/unit\n`;
+          });
+        }
+
+        domCache.aiResponse.innerHTML = response || "ℹ️ Inventory में खोज रहे हैं...";
+      }, 600);
+    }
+
+    // ==================== UI UPDATE ====================
+    function updateUI() {
+      renderProductTable();
+      renderBillTable();
+    }
+
+    // ==================== INITIALIZATION ====================
+    window.addEventListener('load', () => {
+      domCache.init();
+      initTheme();
       loadData();
-      showProducts();
-      showBill();
-    };
+      updateUI();
+    });
   </script>
 </body>
 </html>
