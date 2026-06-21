@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Chourashiya General Store</title>
-  <script src="https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js" defer></script>
   <style>
     :root {
       --primary: #3498db;
@@ -143,6 +142,7 @@
     button:hover { opacity: 0.9; transform: translateY(-2px); }
     button.success { background: var(--success); color: white; border: none; }
     button.danger { background: var(--danger); color: white; border: none; }
+    button.warning { background: #f39c12; color: white; border: none; }
 
     .section {
       background: var(--card);
@@ -177,14 +177,6 @@
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    #readerHome, #readerInv {
-      width: 100%;
-      max-width: 400px;
-      margin: 10px auto;
-      border: 3px solid var(--primary);
-      border-radius: 12px;
-    }
-
     .save-status {
       background: #fff3cd;
       font-size: 0.9em;
@@ -211,7 +203,90 @@
 
     .action-buttons button { width: 48%; }
 
+    .scanner-input {
+      font-size: 14px;
+      width: 100%;
+      padding: 10px;
+      margin: 10px 0;
+      border: 2px solid var(--primary);
+      background: var(--bg);
+    }
+
+    .scanner-status {
+      background: #e8f5e9;
+      color: #2e7d32;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 10px;
+      font-size: 14px;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background-color: var(--card);
+      margin: 10% auto;
+      padding: 30px;
+      border-radius: 12px;
+      width: 90%;
+      max-width: 500px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .modal-header {
+      font-size: 1.5em;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: var(--text);
+    }
+
+    .modal-input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--card);
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .modal-buttons button {
+      flex: 1;
+    }
+
+    .close {
+      color: var(--text);
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover { opacity: 0.8; }
+
     input[type="number"] { font-variant-numeric: tabular-nums; }
+
+    .small-btn {
+      padding: 6px 10px !important;
+      margin: 2px !important;
+      font-size: 13px !important;
+    }
 
     @media (max-width: 600px) {
       .action-buttons { flex-direction: column; }
@@ -254,11 +329,13 @@
       <div id="aiResponse" class="ai-response"></div>
     </div>
 
-    <!-- Camera Scanner Home -->
+    <!-- Barcode Scanner -->
     <div class="section">
-      <h2>📱 Camera Barcode Scanner</h2>
-      <button onclick="startCameraScan('home')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode (Bill में जोड़ें)</button>
-      <div id="readerHome" style="display:none;"></div>
+      <h2>📱 Barcode Scanner (1D/2D)</h2>
+      <div class="scanner-status">
+        🟢 Scanner Ready - Barcode scan करें या Enter दबाएं
+      </div>
+      <input type="text" id="scannerInput" placeholder="Barcode यहाँ आएगा..." class="scanner-input" onchange="handleBarcodeScan('home')">
     </div>
 
     <!-- Grocery & Vegetable -->
@@ -312,9 +389,11 @@
     </div>
 
     <div class="section">
-      <h2>📱 Camera Barcode Scanner (Inventory)</h2>
-      <button onclick="startCameraScan('inventory')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode</button>
-      <div id="readerInv" style="display:none;"></div>
+      <h2>📱 Barcode Scanner (Inventory)</h2>
+      <div class="scanner-status">
+        🟢 Scanner Ready - Barcode scan करें
+      </div>
+      <input type="text" id="scannerInvInput" placeholder="Barcode यहाँ आएगा..." class="scanner-input" onchange="handleBarcodeScan('inventory')">
     </div>
 
     <table id="productTable">
@@ -328,12 +407,54 @@
     <button onclick="clearAllData()" class="danger">🗑️ Clear All</button>
   </div>
 
+  <!-- Edit Stock Modal -->
+  <div id="editStockModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeEditModal()">&times;</span>
+      <div class="modal-header">📝 Edit Stock</div>
+      <div>
+        <label style="font-weight: bold;">Item Name:</label>
+        <input type="text" id="editItemName" class="modal-input" disabled>
+        
+        <label style="font-weight: bold;">Current Stock:</label>
+        <input type="number" id="editCurrentStock" class="modal-input" readonly>
+        
+        <label style="font-weight: bold;">New Stock Quantity:</label>
+        <input type="number" id="editNewStock" class="modal-input" placeholder="नई मात्रा दर्ज करें">
+        
+        <div class="modal-buttons">
+          <button onclick="saveStockEdit()" class="success">✅ Save</button>
+          <button onclick="closeEditModal()" class="danger">❌ Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
+    // ==================== BEEP SOUND FUNCTION ====================
+    function playBeepSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const oscillator = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+
+      oscillator.connect(gain);
+      gain.connect(audioContext.destination);
+
+      oscillator.frequency.value = 800; // Frequency in Hz (beep sound)
+      oscillator.type = 'sine';
+
+      gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+
+      oscillator.start(audioContext.currentTime);
+      oscillator.stop(audioContext.currentTime + 0.2);
+    }
+
     // ==================== STATE MANAGEMENT ====================
     let products = [];
     let bill = [];
-    let html5QrCode = null;
-    let currentMode = null;
+    let scannerActive = false;
+    let editingProductIndex = -1;
     const STORAGE_KEYS = {
       products: "chourashiya_products",
       bill: "chourashiya_bill",
@@ -347,12 +468,16 @@
       grandTotalSpan: null,
       aiResponse: null,
       aiQuery: null,
+      scannerInput: null,
+      scannerInvInput: null,
       init() {
         this.billTableBody = document.getElementById("billTable").querySelector("tbody");
         this.productTableBody = document.getElementById("productTable").querySelector("tbody");
         this.grandTotalSpan = document.getElementById("grandTotal");
         this.aiResponse = document.getElementById("aiResponse");
         this.aiQuery = document.getElementById("aiQuery");
+        this.scannerInput = document.getElementById("scannerInput");
+        this.scannerInvInput = document.getElementById("scannerInvInput");
       }
     };
 
@@ -420,45 +545,24 @@
 
       tabs.forEach((tab, i) => tab.classList.toggle('active', i === n));
       contents.forEach((content, i) => content.classList.toggle('active', i === n));
-    }
 
-    // ==================== CAMERA SCANNER ====================
-    function startCameraScan(mode) {
-      currentMode = mode;
-      const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
-      const readerDiv = document.getElementById(readerId);
-
-      readerDiv.style.display = 'block';
-
-      if (html5QrCode) {
-        html5QrCode.clear();
-      }
-
-      html5QrCode = new Html5Qrcode(readerId);
-
-      html5QrCode.start(
-        { facingMode: "environment" },
-        { fps: 15, qrbox: { width: 280, height: 280 } },
-        (decodedText) => handleScanResult(decodedText, mode),
-        (errorMessage) => {}
-      ).catch((err) => {
-        alert("Camera Start करने में समस्या: " + err);
-        readerDiv.style.display = 'none';
-      });
-    }
-
-    function stopCameraScan(mode) {
-      const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
-      if (html5QrCode) {
-        html5QrCode.stop().then(() => {
-          document.getElementById(readerId).style.display = 'none';
-        });
+      // Focus scanner input on tab switch
+      if (n === 0) {
+        setTimeout(() => domCache.scannerInput.focus(), 100);
+      } else if (n === 1) {
+        setTimeout(() => domCache.scannerInvInput.focus(), 100);
       }
     }
 
-    function handleScanResult(barcode, mode) {
-      stopCameraScan(mode);
-      barcode = barcode.trim();
+    // ==================== BARCODE SCANNER ====================
+    function handleBarcodeScan(mode) {
+      const inputElement = mode === 'home' ? domCache.scannerInput : domCache.scannerInvInput;
+      const barcode = inputElement.value.trim();
+
+      if (!barcode) return;
+
+      // Play beep sound
+      playBeepSound();
 
       if (mode === 'home') {
         const item = products.find(p => p.barcode === barcode);
@@ -471,22 +575,73 @@
               item.qty -= q;
               updateUI();
               saveData();
+              alert(`✅ ${item.name} (${q} units) Bill में जोड़ा गया!`);
             } else {
-              alert("Stock कम है!");
+              alert("❌ Stock कम है!");
             }
           }
         } else {
-          alert("यह Barcode Inventory में नहीं मिला!");
+          alert("❌ यह Barcode Inventory में नहीं मिला!");
         }
       } else {
+        // Inventory mode
         const item = products.find(p => p.barcode === barcode);
         if (item) {
           alert(`✅ Found!\nItem: ${item.name}\nStock: ${item.qty}`);
+          setInputValue("barcodeInv", barcode);
         } else {
           setInputValue("barcodeInv", barcode);
           document.getElementById("name").focus();
-          alert("🆕 नया Barcode मिला! Name, Rate भरकर Add करें");
+          alert("🆕 नया Barcode! Name, Rate भरकर Add करें");
         }
+      }
+
+      inputElement.value = "";
+      inputElement.focus();
+    }
+
+    // ==================== EDIT STOCK MODAL ====================
+    function openEditModal(index) {
+      const item = products[index];
+      editingProductIndex = index;
+
+      document.getElementById("editItemName").value = item.name;
+      document.getElementById("editCurrentStock").value = item.qty;
+      document.getElementById("editNewStock").value = item.qty;
+
+      document.getElementById("editStockModal").style.display = "block";
+      document.getElementById("editNewStock").focus();
+    }
+
+    function closeEditModal() {
+      document.getElementById("editStockModal").style.display = "none";
+      editingProductIndex = -1;
+    }
+
+    function saveStockEdit() {
+      const newStock = parseNumber(document.getElementById("editNewStock").value);
+
+      if (editingProductIndex < 0 || editingProductIndex >= products.length) {
+        alert("❌ Invalid product!");
+        return;
+      }
+
+      if (newStock < 0) {
+        alert("❌ Stock नकारात्मक नहीं हो सकता!");
+        return;
+      }
+
+      products[editingProductIndex].qty = newStock;
+      saveData();
+      updateUI();
+      closeEditModal();
+      alert(`✅ Stock Updated!\n${products[editingProductIndex].name}: ${newStock} units`);
+    }
+
+    window.onclick = function(event) {
+      const modal = document.getElementById("editStockModal");
+      if (event.target == modal) {
+        closeEditModal();
       }
     }
 
@@ -503,14 +658,17 @@
       const existing = products.find(p => p.barcode === barcode && barcode !== "");
       if (existing) {
         existing.qty += qty;
+        alert(`✅ "${name}" Stock updated! नया Total: ${existing.qty}`);
       } else {
         products.push({barcode, name, cost, selling, qty});
+        alert(`✅ "${name}" Inventory में जोड़ा गया!`);
       }
 
       updateUI();
       saveData();
       clearInputValues(["barcodeInv", "name", "cost", "selling"]);
       setInputValue("qty", "10");
+      document.getElementById("barcodeInv").focus();
     }
 
     function renderProductTable() {
@@ -523,8 +681,11 @@
           <td>${item.barcode || '-'}</td>
           <td>${item.name}</td>
           <td>₹${item.selling}</td>
-          <td>${item.qty}</td>
-          <td><button onclick="addToBillFromInventory(${i})" class="success">Bill में जोड़ें</button></td>
+          <td><strong>${item.qty}</strong></td>
+          <td>
+            <button onclick="addToBillFromInventory(${i})" class="success small-btn">Bill</button>
+            <button onclick="openEditModal(${i})" class="warning small-btn">✏️ Edit</button>
+          </td>
         `;
         fragment.appendChild(row);
       });
@@ -544,6 +705,7 @@
       item.qty -= q;
       updateUI();
       saveData();
+      alert(`✅ ${item.name} (${q} units) Bill में जोड़ा गया!`);
     }
 
     // ==================== BILL ====================
@@ -558,6 +720,7 @@
       updateUI();
       saveData();
       clearInputValues(["groceryName", "groceryQty", "groceryRate"]);
+      alert(`✅ "${name}" Bill में जोड़ा गया!`);
     }
 
     function addVegetableToBill() {
@@ -572,6 +735,7 @@
       updateUI();
       saveData();
       clearInputValues(["vegName", "vegGrams", "vegRateKg"]);
+      alert(`✅ "${name}" (${grams}g) Bill में जोड़ा गया!`);
     }
 
     function renderBillTable() {
@@ -587,7 +751,7 @@
           <td>${item.qty}</td>
           <td>₹${item.rate}</td>
           <td>₹${(item.total || 0).toFixed(2)}</td>
-          <td><button onclick="removeFromBill(${i})" class="danger">Remove</button></td>
+          <td><button onclick="removeFromBill(${i})" class="danger small-btn">Remove</button></td>
         `;
         fragment.appendChild(row);
       });
@@ -725,6 +889,7 @@
       initTheme();
       loadData();
       updateUI();
+      domCache.scannerInput.focus();
     });
   </script>
 </body>
