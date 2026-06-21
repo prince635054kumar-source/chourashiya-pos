@@ -2,8 +2,9 @@
 <html lang="hi">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Chourashiya General Store</title>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
   <style>
     :root {
       --primary: #3498db;
@@ -13,6 +14,8 @@
       --card: #ffffff;
       --text: #2c3e50;
       --border: #ddd;
+      --safe-top: max(16px, env(safe-area-inset-top));
+      --safe-bottom: max(16px, env(safe-area-inset-bottom));
     }
 
     [data-theme="dark"] {
@@ -23,18 +26,35 @@
       --primary: #60a5fa;
     }
 
-    * { box-sizing: border-box; }
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html, body {
+      width: 100%;
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
 
     body {
       font-family: system-ui, -apple-system, sans-serif;
-      margin: 0;
-      padding: 12px;
       background: var(--bg);
       color: var(--text);
       line-height: 1.5;
+      display: flex;
+      flex-direction: column;
     }
 
-    h1, h2 { margin: 12px 0; color: var(--text); }
+    #appContainer {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+    }
 
     #splashScreen {
       position: fixed;
@@ -51,6 +71,7 @@
       color: white;
       text-align: center;
       animation: fadeOut 2.8s forwards 2s;
+      padding: var(--safe-top) 0 var(--safe-bottom) 0;
     }
 
     .store-name {
@@ -68,55 +89,79 @@
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
+    .header {
+      background: var(--card);
+      padding: var(--safe-top) 12px 12px 12px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    .header h1 {
+      margin: 0;
+      font-size: 1.3em;
+      flex: 1;
+      text-align: center;
+    }
+
     .theme-toggle {
-      position: fixed;
-      top: 15px;
-      right: 15px;
       font-size: 24px;
       z-index: 999;
-      padding: 10px 14px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      padding: 8px 12px;
+      background: transparent;
+      border: none;
       cursor: pointer;
     }
 
     .tabs {
       display: flex;
-      margin: 15px 0;
       background: var(--card);
-      border-radius: 12px;
       padding: 6px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
       gap: 6px;
+      flex-shrink: 0;
+      border-bottom: 1px solid var(--border);
     }
 
     .tab {
       flex: 1;
-      padding: 14px;
+      padding: 12px;
       text-align: center;
       font-weight: bold;
-      border-radius: 10px;
+      border-radius: 8px;
       cursor: pointer;
       border: none;
       background: transparent;
       color: var(--text);
       transition: all 0.3s ease;
+      font-size: 14px;
     }
 
     .tab:hover { opacity: 0.8; }
     .tab.active { background: var(--primary); color: white; }
 
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 12px;
+      padding-bottom: var(--safe-bottom);
+    }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     table {
       width: 100%;
       border-collapse: collapse;
-      margin: 15px 0;
+      margin: 12px 0;
       background: var(--card);
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      font-size: 13px;
     }
 
     th, td {
-      padding: 12px;
+      padding: 10px;
       border: 1px solid var(--border);
       text-align: left;
     }
@@ -131,6 +176,8 @@
       border: 1px solid var(--border);
       background: var(--card);
       color: var(--text);
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     button {
@@ -139,7 +186,7 @@
       transition: all 0.3s ease;
     }
 
-    button:hover { opacity: 0.9; transform: translateY(-2px); }
+    button:active { opacity: 0.8; }
     button.success { background: var(--success); color: white; border: none; }
     button.danger { background: var(--danger); color: white; border: none; }
     button.warning { background: #f39c12; color: white; border: none; }
@@ -148,16 +195,16 @@
       background: var(--card);
       padding: 15px;
       border-radius: 12px;
-      margin: 12px 0;
+      margin: 10px 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     }
 
-    .ai-section { border: 3px solid var(--primary); }
-
     .total {
-      font-size: 1.9em;
+      font-size: 1.8em;
       font-weight: bold;
       color: var(--success);
       margin: 15px 0;
+      text-align: center;
     }
 
     .flex-row {
@@ -167,47 +214,11 @@
       align-items: center;
     }
 
-    .mic-btn {
-      font-size: 24px;
-      padding: 14px 18px !important;
-    }
-
-    .mic-btn.listening { background: #e74c3c !important; transform: scale(1.1); }
-
-    .tab-content { display: none; }
-    .tab-content.active { display: block; }
-
-    .save-status {
-      background: #fff3cd;
-      font-size: 0.9em;
-      padding: 10px;
-      border-radius: 8px;
-      margin-bottom: 12px;
-    }
-
-    .ai-response {
-      margin-top: 10px;
-      padding: 12px;
-      background: #f0f8ff;
-      border-radius: 8px;
-      min-height: 130px;
-      white-space: pre-wrap;
-    }
-
-    .action-buttons {
-      display: flex;
-      justify-content: center;
-      gap: 12px;
-      margin-top: 15px;
-    }
-
-    .action-buttons button { width: 48%; }
-
     .scanner-input {
-      font-size: 14px;
+      font-size: 16px;
       width: 100%;
-      padding: 10px;
-      margin: 10px 0;
+      padding: 12px;
+      margin: 8px 0;
       border: 2px solid var(--primary);
       background: var(--bg);
     }
@@ -218,7 +229,30 @@
       padding: 10px;
       border-radius: 8px;
       margin-bottom: 10px;
-      font-size: 14px;
+      font-size: 13px;
+    }
+
+    .camera-container {
+      width: 100%;
+      margin: 10px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #000;
+    }
+
+    #cameraStream {
+      width: 100%;
+      display: block;
+    }
+
+    .camera-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .camera-controls button {
+      flex: 1;
     }
 
     .modal {
@@ -229,7 +263,8 @@
       top: 0;
       width: 100%;
       height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: var(--safe-top) 0 var(--safe-bottom) 0;
     }
 
     .modal-content {
@@ -243,7 +278,7 @@
     }
 
     .modal-header {
-      font-size: 1.5em;
+      font-size: 1.3em;
       font-weight: bold;
       margin-bottom: 20px;
       color: var(--text);
@@ -258,6 +293,8 @@
       background: var(--card);
       color: var(--text);
       font-size: 16px;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .modal-buttons {
@@ -278,210 +315,296 @@
       cursor: pointer;
     }
 
-    .close:hover { opacity: 0.8; }
-
-    input[type="number"] { font-variant-numeric: tabular-nums; }
-
     .small-btn {
       padding: 6px 10px !important;
       margin: 2px !important;
-      font-size: 13px !important;
+      font-size: 12px !important;
     }
 
-    @media (max-width: 600px) {
-      .action-buttons { flex-direction: column; }
-      .action-buttons button { width: 100%; }
+    .save-status {
+      background: #fff3cd;
+      font-size: 0.9em;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .ai-response {
+      margin-top: 10px;
+      padding: 12px;
+      background: #f0f8ff;
+      border-radius: 8px;
+      min-height: 100px;
+      white-space: pre-wrap;
+      font-size: 13px;
+    }
+
+    .action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .action-buttons button {
+      width: 48%;
+      padding: 10px !important;
+      margin: 0 !important;
+    }
+
+    .barcode-preview {
+      text-align: center;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 480px) {
+      .header h1 {
+        font-size: 1.1em;
+      }
+
+      .tab {
+        padding: 10px;
+        font-size: 12px;
+      }
+
+      table {
+        font-size: 12px;
+      }
+
+      th, td {
+        padding: 8px;
+      }
+
+      input, button {
+        padding: 10px;
+        margin: 4px;
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Splash Screen -->
-  <div id="splashScreen">
-    <h1 class="store-name">🏪 Chourashiya</h1>
-    <h1 class="store-name" style="margin-top:-12px;">General Store</h1>
-    <p class="tagline">Smart POS System</p>
-  </div>
-
-  <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
-
-  <h1 style="text-align:center;">🏪 Chourashiya General Store</h1>
-
-  <!-- Tabs -->
-  <div class="tabs">
-    <button class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</button>
-    <button class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</button>
-  </div>
-
-  <!-- ==================== HOME TAB ==================== -->
-  <div id="content0" class="tab-content active">
-    <div class="save-status">
-      💾 Data Save Mode: <span id="saveStatus">Browser Storage</span>
+  <div id="appContainer">
+    <!-- Splash Screen -->
+    <div id="splashScreen">
+      <h1 class="store-name">🏪 Chourashiya</h1>
+      <h1 class="store-name" style="margin-top:-12px;">General Store</h1>
+      <p class="tagline">Smart POS System</p>
     </div>
 
-    <!-- AI Assistant -->
-    <div class="section ai-section">
-      <h2>🤖 Voice + AI Assistant</h2>
-      <div class="flex-row">
-        <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="handleEnter(event, askAI)">
-        <button onclick="startVoice()" id="micButton" class="success mic-btn">🎤</button>
-        <button onclick="askAI()" class="success">Ask AI</button>
+    <!-- Header -->
+    <div class="header">
+      <h1>🏪 Chourashiya POS</h1>
+      <button class="theme-toggle" onclick="toggleTheme()" title="Toggle Dark Mode">🌙</button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab(0)" id="tab0">🏠 Home</button>
+      <button class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</button>
+    </div>
+
+    <!-- Content Area -->
+    <div class="content-area">
+      <!-- ==================== HOME TAB ==================== -->
+      <div id="content0" class="tab-content active">
+        <div class="save-status">
+          💾 Data Save Mode: <span id="saveStatus">Browser Storage</span>
+        </div>
+
+        <!-- AI Assistant -->
+        <div class="section">
+          <h2 style="margin-top: 0;">🤖 AI Assistant</h2>
+          <div class="flex-row">
+            <input id="aiQuery" placeholder="आलू का रेट..." style="flex:1;" onkeypress="handleEnter(event, askAI)">
+            <button onclick="askAI()" class="success" style="width: auto;">Ask</button>
+          </div>
+          <div id="aiResponse" class="ai-response"></div>
+        </div>
+
+        <!-- Camera Scanner -->
+        <div class="section">
+          <h2 style="margin-top: 0;">📱 Barcode Scanner</h2>
+          <div class="scanner-status">
+            🟢 Ready - Scan or Enter
+          </div>
+          <input type="text" id="scannerInput" placeholder="Barcode..." class="scanner-input" onchange="handleBarcodeScan('home')">
+          <button onclick="openCameraScanner('home')" class="success" style="width: 100%;">📸 Use Camera</button>
+        </div>
+
+        <!-- Camera Scanner View -->
+        <div id="cameraScannerHome" style="display: none;">
+          <div class="camera-container">
+            <video id="cameraStream" playsinline autoplay></video>
+          </div>
+          <canvas id="barcodeCanvasHome" style="display: none;"></canvas>
+          <div class="camera-controls">
+            <button onclick="closeCameraScanner('home')" class="danger" style="flex: 1;">Close Camera</button>
+          </div>
+        </div>
+
+        <!-- Grocery -->
+        <div class="section">
+          <h2 style="margin-top: 0;">🛒 Grocery</h2>
+          <div class="flex-row">
+            <input id="groceryName" placeholder="Item Name" style="flex:1;">
+            <input id="groceryQty" type="number" placeholder="Qty" style="width:80px;">
+            <input id="groceryRate" type="number" placeholder="Rate" style="width:90px;">
+            <button onclick="addGroceryToBill()" class="success">Add</button>
+          </div>
+        </div>
+
+        <!-- Vegetable -->
+        <div class="section">
+          <h2 style="margin-top: 0;">🥕 Vegetables</h2>
+          <div class="flex-row">
+            <input id="vegName" placeholder="Name" style="flex:1;">
+            <input id="vegGrams" type="number" placeholder="Grams" style="width:90px;">
+            <input id="vegRateKg" type="number" placeholder="Rate/Kg" style="width:100px;">
+            <button onclick="addVegetableToBill()" class="success">Add</button>
+          </div>
+        </div>
+
+        <!-- Bill -->
+        <div class="section">
+          <h2 style="margin-top: 0;">🛒 Bill</h2>
+          <table id="billTable">
+            <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Remove</th></tr></thead>
+            <tbody></tbody>
+          </table>
+          <p class="total">₹<span id="grandTotal">0</span></p>
+          <div class="action-buttons">
+            <button onclick="clearBill()" class="danger">Clear</button>
+            <button onclick="printBill()" class="success">Print</button>
+          </div>
+        </div>
       </div>
-      <div id="aiResponse" class="ai-response"></div>
-    </div>
 
-    <!-- Barcode Scanner -->
-    <div class="section">
-      <h2>📱 Barcode Scanner (1D/2D)</h2>
-      <div class="scanner-status">
-        🟢 Scanner Ready - Barcode scan करें या Enter दबाएं
-      </div>
-      <input type="text" id="scannerInput" placeholder="Barcode यहाँ आएगा..." class="scanner-input" onchange="handleBarcodeScan('home')">
-    </div>
+      <!-- ==================== INVENTORY TAB ==================== -->
+      <div id="content1" class="tab-content">
+        <!-- Add Product -->
+        <div class="section">
+          <h2 style="margin-top: 0;">📦 Add Product</h2>
+          <div class="flex-row">
+            <input id="barcodeInv" placeholder="Barcode" style="width:140px;">
+            <input id="name" placeholder="Name" style="flex:1;">
+          </div>
+          <div class="flex-row">
+            <input id="cost" type="number" placeholder="Cost" style="width:90px;">
+            <input id="selling" type="number" placeholder="Selling" style="width:100px;">
+            <input id="qty" type="number" value="10" style="width:70px;">
+            <button onclick="addProduct()" class="success">Add</button>
+          </div>
+        </div>
 
-    <!-- Grocery & Vegetable -->
-    <div class="section">
-      <h2>🛒 Grocery Selling</h2>
-      <div class="flex-row">
-        <input id="groceryName" placeholder="Item Name" style="flex:1;">
-        <input id="groceryQty" type="number" placeholder="Qty" style="width:90px;">
-        <input id="groceryRate" type="number" placeholder="Rate" style="width:110px;">
-        <button onclick="addGroceryToBill()" class="success">Add</button>
-      </div>
-    </div>
+        <!-- Camera Scanner Inventory -->
+        <div class="section">
+          <h2 style="margin-top: 0;">📱 Scanner</h2>
+          <div class="scanner-status">
+            🟢 Ready
+          </div>
+          <input type="text" id="scannerInvInput" placeholder="Barcode..." class="scanner-input" onchange="handleBarcodeScan('inventory')">
+          <button onclick="openCameraScanner('inventory')" class="success" style="width: 100%;">📸 Use Camera</button>
+        </div>
 
-    <div class="section">
-      <h2>🥕 Vegetable Selling</h2>
-      <div class="flex-row">
-        <input id="vegName" placeholder="Sabji Naam" style="flex:1;">
-        <input id="vegGrams" type="number" step="1" placeholder="Grams" style="width:110px;">
-        <input id="vegRateKg" type="number" placeholder="Rate/Kg" style="width:130px;">
-        <button onclick="addVegetableToBill()" class="success">Add</button>
-      </div>
-    </div>
+        <!-- Camera Scanner View Inventory -->
+        <div id="cameraScannerInv" style="display: none;">
+          <div class="camera-container">
+            <video id="cameraStreamInv" playsinline autoplay></video>
+          </div>
+          <canvas id="barcodeCanvasInv" style="display: none;"></canvas>
+          <div class="camera-controls">
+            <button onclick="closeCameraScanner('inventory')" class="danger" style="flex: 1;">Close Camera</button>
+          </div>
+        </div>
 
-    <!-- Bill -->
-    <div class="section bill">
-      <h2>🛒 Customer Bill</h2>
-      <table id="billTable">
-        <thead><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th><th>Action</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <p class="total">Grand Total: ₹<span id="grandTotal">0</span></p>
-      <div class="action-buttons">
-        <button onclick="clearBill()" class="danger">Clear Bill</button>
-        <button onclick="printBill()" class="success">🖨️ Print Bill</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==================== INVENTORY TAB ==================== -->
-  <div id="content1" class="tab-content">
-    <div class="section">
-      <h2>📦 Add Product</h2>
-      <div class="flex-row">
-        <input id="barcodeInv" placeholder="Barcode" style="width:160px;">
-        <input id="name" placeholder="Item Name" style="flex:1;">
-        <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
-        <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
-        <input id="qty" type="number" value="10" style="width:80px;">
-        <button onclick="addProduct()" class="success">Add to Inventory</button>
+        <!-- Products Table -->
+        <table id="productTable">
+          <thead><tr><th>Barcode</th><th>Name</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead>
+          <tbody></tbody>
+        </table>
       </div>
     </div>
-
-    <div class="section">
-      <h2>📱 Barcode Scanner (Inventory)</h2>
-      <div class="scanner-status">
-        🟢 Scanner Ready - Barcode scan करें
-      </div>
-      <input type="text" id="scannerInvInput" placeholder="Barcode यहाँ आएगा..." class="scanner-input" onchange="handleBarcodeScan('inventory')">
-    </div>
-
-    <table id="productTable">
-      <thead><tr><th>Barcode</th><th>Name</th><th>Selling</th><th>Stock</th><th>Action</th></tr></thead>
-      <tbody></tbody>
-    </table>
-  </div>
-
-  <div style="text-align:center;margin:20px;">
-    <button onclick="exportData()" class="success">📤 Export Backup</button>
-    <button onclick="clearAllData()" class="danger">🗑️ Clear All</button>
   </div>
 
   <!-- Edit Stock Modal -->
   <div id="editStockModal" class="modal">
     <div class="modal-content">
       <span class="close" onclick="closeEditModal()">&times;</span>
-      <div class="modal-header">📝 Edit Stock</div>
+      <div class="modal-header">✏️ Edit Stock</div>
       <div>
-        <label style="font-weight: bold;">Item Name:</label>
+        <label style="font-weight: bold;">Item:</label>
         <input type="text" id="editItemName" class="modal-input" disabled>
         
-        <label style="font-weight: bold;">Current Stock:</label>
+        <label style="font-weight: bold;">Current:</label>
         <input type="number" id="editCurrentStock" class="modal-input" readonly>
         
-        <label style="font-weight: bold;">New Stock Quantity:</label>
-        <input type="number" id="editNewStock" class="modal-input" placeholder="नई मात्रा दर्ज करें">
+        <label style="font-weight: bold;">New Quantity:</label>
+        <input type="number" id="editNewStock" class="modal-input" placeholder="Enter quantity">
         
         <div class="modal-buttons">
-          <button onclick="saveStockEdit()" class="success">✅ Save</button>
-          <button onclick="closeEditModal()" class="danger">❌ Cancel</button>
+          <button onclick="saveStockEdit()" class="success">Save</button>
+          <button onclick="closeEditModal()" class="danger">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@ericblade/quagga2@1.0.0/dist/quagga.js"></script>
+
   <script>
-    // ==================== BEEP SOUND FUNCTION ====================
+    // ==================== BEEP SOUND ====================
     function playBeepSound() {
-      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-      const oscillator = audioContext.createOscillator();
-      const gain = audioContext.createGain();
+      try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gain = audioContext.createGain();
 
-      oscillator.connect(gain);
-      gain.connect(audioContext.destination);
+        oscillator.connect(gain);
+        gain.connect(audioContext.destination);
 
-      oscillator.frequency.value = 800; // Frequency in Hz (beep sound)
-      oscillator.type = 'sine';
+        oscillator.frequency.value = 800;
+        oscillator.type = 'sine';
 
-      gain.gain.setValueAtTime(0.3, audioContext.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioContext.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
 
-      oscillator.start(audioContext.currentTime);
-      oscillator.stop(audioContext.currentTime + 0.2);
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.2);
+      } catch (e) {}
     }
 
-    // ==================== STATE MANAGEMENT ====================
+    // ==================== STATE ====================
     let products = [];
     let bill = [];
-    let scannerActive = false;
     let editingProductIndex = -1;
+    let cameraActive = false;
+    let currentCameraMode = null;
+
     const STORAGE_KEYS = {
       products: "chourashiya_products",
       bill: "chourashiya_bill",
       theme: "chourashiya_theme"
     };
 
-    // ==================== DOM CACHE ====================
     const domCache = {
       billTableBody: null,
       productTableBody: null,
       grandTotalSpan: null,
-      aiResponse: null,
-      aiQuery: null,
       scannerInput: null,
       scannerInvInput: null,
+      aiResponse: null,
       init() {
         this.billTableBody = document.getElementById("billTable").querySelector("tbody");
         this.productTableBody = document.getElementById("productTable").querySelector("tbody");
         this.grandTotalSpan = document.getElementById("grandTotal");
-        this.aiResponse = document.getElementById("aiResponse");
-        this.aiQuery = document.getElementById("aiQuery");
         this.scannerInput = document.getElementById("scannerInput");
         this.scannerInvInput = document.getElementById("scannerInvInput");
+        this.aiResponse = document.getElementById("aiResponse");
       }
     };
 
-    // ==================== UTILITY FUNCTIONS ====================
+    // ==================== UTILITY ====================
     function handleEnter(event, callback) {
       if (event.key === 'Enter') callback();
     }
@@ -508,9 +631,7 @@
       try {
         localStorage.setItem(STORAGE_KEYS.products, JSON.stringify(products));
         localStorage.setItem(STORAGE_KEYS.bill, JSON.stringify(bill));
-      } catch (e) {
-        console.error("Storage error:", e);
-      }
+      } catch (e) {}
     }
 
     function loadData() {
@@ -520,9 +641,7 @@
 
         const savedBill = localStorage.getItem(STORAGE_KEYS.bill);
         if (savedBill) bill = JSON.parse(savedBill);
-      } catch (e) {
-        console.error("Load error:", e);
-      }
+      } catch (e) {}
     }
 
     // ==================== THEME ====================
@@ -538,7 +657,7 @@
       document.documentElement.setAttribute("data-theme", savedTheme);
     }
 
-    // ==================== TAB NAVIGATION ====================
+    // ==================== TABS ====================
     function switchTab(n) {
       const tabs = document.querySelectorAll('.tab');
       const contents = document.querySelectorAll('.tab-content');
@@ -546,7 +665,6 @@
       tabs.forEach((tab, i) => tab.classList.toggle('active', i === n));
       contents.forEach((content, i) => content.classList.toggle('active', i === n));
 
-      // Focus scanner input on tab switch
       if (n === 0) {
         setTimeout(() => domCache.scannerInput.focus(), 100);
       } else if (n === 1) {
@@ -554,20 +672,79 @@
       }
     }
 
-    // ==================== BARCODE SCANNER ====================
-    function handleBarcodeScan(mode) {
-      const inputElement = mode === 'home' ? domCache.scannerInput : domCache.scannerInvInput;
-      const barcode = inputElement.value.trim();
+    // ==================== CAMERA SCANNER ====================
+    function openCameraScanner(mode) {
+      currentCameraMode = mode;
+      const containerElement = mode === 'home' ? document.getElementById('cameraScannerHome') : document.getElementById('cameraScannerInv');
+      const videoElement = mode === 'home' ? document.getElementById('cameraStream') : document.getElementById('cameraStreamInv');
 
-      if (!barcode) return;
+      containerElement.style.display = 'block';
 
-      // Play beep sound
-      playBeepSound();
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+        .then(stream => {
+          videoElement.srcObject = stream;
+          cameraActive = true;
+          startBarcodeDetection(mode);
+        })
+        .catch(err => {
+          alert("❌ Camera access denied!");
+          containerElement.style.display = 'none';
+        });
+    }
 
+    function closeCameraScanner(mode) {
+      const containerElement = mode === 'home' ? document.getElementById('cameraScannerHome') : document.getElementById('cameraScannerInv');
+      const videoElement = mode === 'home' ? document.getElementById('cameraStream') : document.getElementById('cameraStreamInv');
+
+      if (videoElement.srcObject) {
+        videoElement.srcObject.getTracks().forEach(track => track.stop());
+      }
+
+      containerElement.style.display = 'none';
+      cameraActive = false;
+      currentCameraMode = null;
+    }
+
+    function startBarcodeDetection(mode) {
+      const videoElement = mode === 'home' ? document.getElementById('cameraStream') : document.getElementById('cameraStreamInv');
+      const canvasElement = mode === 'home' ? document.getElementById('barcodeCanvasHome') : document.getElementById('barcodeCanvasInv');
+
+      Quagga.init({
+        inputStream: {
+          name: 'Live',
+          type: 'LiveStream',
+          target: videoElement,
+          constraints: {
+            facingMode: 'environment'
+          }
+        },
+        decoder: {
+          readers: ['code_128_reader', 'ean_reader', 'ean_8_reader', 'upc_reader']
+        }
+      }, function(err) {
+        if (err) {
+          console.error(err);
+          return;
+        }
+        Quagga.start();
+
+        Quagga.onDetected(function(result) {
+          if (result.codeResult && result.codeResult.code) {
+            playBeepSound();
+            const barcode = result.codeResult.code;
+            handleBarcodeDetected(barcode, mode);
+            Quagga.stop();
+            closeCameraScanner(mode);
+          }
+        });
+      });
+    }
+
+    function handleBarcodeDetected(barcode, mode) {
       if (mode === 'home') {
         const item = products.find(p => p.barcode === barcode);
         if (item) {
-          const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
+          const qtyStr = prompt(`"${item.name}" Quantity?`, "1");
           if (qtyStr) {
             const q = parseNumber(qtyStr);
             if (q > 0 && q <= item.qty) {
@@ -575,32 +752,41 @@
               item.qty -= q;
               updateUI();
               saveData();
-              alert(`✅ ${item.name} (${q} units) Bill में जोड़ा गया!`);
+              alert(`✅ Added!`);
             } else {
-              alert("❌ Stock कम है!");
+              alert("❌ Low stock!");
             }
           }
         } else {
-          alert("❌ यह Barcode Inventory में नहीं मिला!");
+          alert("❌ Not found!");
         }
       } else {
-        // Inventory mode
         const item = products.find(p => p.barcode === barcode);
         if (item) {
-          alert(`✅ Found!\nItem: ${item.name}\nStock: ${item.qty}`);
-          setInputValue("barcodeInv", barcode);
+          alert(`✅ Found!\n${item.name}\nStock: ${item.qty}`);
         } else {
           setInputValue("barcodeInv", barcode);
           document.getElementById("name").focus();
-          alert("🆕 नया Barcode! Name, Rate भरकर Add करें");
+          alert("🆕 New barcode!");
         }
       }
+    }
+
+    // ==================== BARCODE SCANNER (Manual) ====================
+    function handleBarcodeScan(mode) {
+      const inputElement = mode === 'home' ? domCache.scannerInput : domCache.scannerInvInput;
+      const barcode = inputElement.value.trim();
+
+      if (!barcode) return;
+
+      playBeepSound();
+      handleBarcodeDetected(barcode, mode);
 
       inputElement.value = "";
       inputElement.focus();
     }
 
-    // ==================== EDIT STOCK MODAL ====================
+    // ==================== EDIT STOCK ====================
     function openEditModal(index) {
       const item = products[index];
       editingProductIndex = index;
@@ -622,12 +808,12 @@
       const newStock = parseNumber(document.getElementById("editNewStock").value);
 
       if (editingProductIndex < 0 || editingProductIndex >= products.length) {
-        alert("❌ Invalid product!");
+        alert("❌ Invalid!");
         return;
       }
 
       if (newStock < 0) {
-        alert("❌ Stock नकारात्मक नहीं हो सकता!");
+        alert("❌ Cannot be negative!");
         return;
       }
 
@@ -635,7 +821,7 @@
       saveData();
       updateUI();
       closeEditModal();
-      alert(`✅ Stock Updated!\n${products[editingProductIndex].name}: ${newStock} units`);
+      alert(`✅ Updated!`);
     }
 
     window.onclick = function(event) {
@@ -653,15 +839,13 @@
       const selling = parseNumber(document.getElementById("selling").value);
       const qty = parseNumber(document.getElementById("qty").value);
 
-      if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
+      if (!name || selling <= 0) return alert("Fill details!");
 
       const existing = products.find(p => p.barcode === barcode && barcode !== "");
       if (existing) {
         existing.qty += qty;
-        alert(`✅ "${name}" Stock updated! नया Total: ${existing.qty}`);
       } else {
         products.push({barcode, name, cost, selling, qty});
-        alert(`✅ "${name}" Inventory में जोड़ा गया!`);
       }
 
       updateUI();
@@ -684,7 +868,7 @@
           <td><strong>${item.qty}</strong></td>
           <td>
             <button onclick="addToBillFromInventory(${i})" class="success small-btn">Bill</button>
-            <button onclick="openEditModal(${i})" class="warning small-btn">✏️ Edit</button>
+            <button onclick="openEditModal(${i})" class="warning small-btn">Edit</button>
           </td>
         `;
         fragment.appendChild(row);
@@ -695,17 +879,16 @@
 
     function addToBillFromInventory(i) {
       const item = products[i];
-      const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
+      const qtyStr = prompt(`"${item.name}" Quantity?`, "1");
       if (!qtyStr) return;
 
       const q = parseNumber(qtyStr);
-      if (q <= 0 || q > item.qty) return alert("Stock कम है!");
+      if (q <= 0 || q > item.qty) return alert("Low stock!");
 
       bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
       item.qty -= q;
       updateUI();
       saveData();
-      alert(`✅ ${item.name} (${q} units) Bill में जोड़ा गया!`);
     }
 
     // ==================== BILL ====================
@@ -714,13 +897,12 @@
       const qty = parseNumber(document.getElementById("groceryQty").value);
       const rate = parseNumber(document.getElementById("groceryRate").value);
 
-      if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
+      if (!name || qty <= 0 || rate <= 0) return alert("Fill all!");
 
       bill.push({name, qty, rate, total: qty * rate});
       updateUI();
       saveData();
       clearInputValues(["groceryName", "groceryQty", "groceryRate"]);
-      alert(`✅ "${name}" Bill में जोड़ा गया!`);
     }
 
     function addVegetableToBill() {
@@ -728,14 +910,13 @@
       const grams = parseNumber(document.getElementById("vegGrams").value);
       const rate = parseNumber(document.getElementById("vegRateKg").value);
 
-      if (!name || grams <= 0 || rate <= 0) return alert("Sabji, Grams और Rate डालें!");
+      if (!name || grams <= 0 || rate <= 0) return alert("Fill all!");
 
       const amount = (grams / 1000) * rate;
       bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
       updateUI();
       saveData();
       clearInputValues(["vegName", "vegGrams", "vegRateKg"]);
-      alert(`✅ "${name}" (${grams}g) Bill में जोड़ा गया!`);
     }
 
     function renderBillTable() {
@@ -751,7 +932,7 @@
           <td>${item.qty}</td>
           <td>₹${item.rate}</td>
           <td>₹${(item.total || 0).toFixed(2)}</td>
-          <td><button onclick="removeFromBill(${i})" class="danger small-btn">Remove</button></td>
+          <td><button onclick="removeFromBill(${i})" class="danger small-btn">✕</button></td>
         `;
         fragment.appendChild(row);
       });
@@ -767,7 +948,7 @@
     }
 
     function clearBill() {
-      if (confirm("Bill Clear करें?")) {
+      if (confirm("Clear bill?")) {
         bill = [];
         updateUI();
         saveData();
@@ -778,7 +959,7 @@
       const printWindow = window.open('', '_blank');
       const total = bill.reduce((sum, item) => sum + (item.total || 0), 0);
 
-      let html = `<html><head><title>Bill</title><style>body{font-family:monospace;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid black;padding:8px;}</style></head><body>
+      let html = `<html><head><title>Bill</title><style>body{font-family:monospace;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid;padding:8px;}</style></head><body>
         <h2 style="text-align:center">Chourashiya General Store</h2>
         <p style="text-align:center">Date: ${new Date().toLocaleDateString('hi-IN')}</p><hr>
         <table><tr><th>Item</th><th>Qty</th><th>Rate</th><th>Amount</th></tr>`;
@@ -787,103 +968,72 @@
         html += `<tr><td>${item.name}</td><td>${item.qty}</td><td>₹${item.rate}</td><td>₹${item.total.toFixed(2)}</td></tr>`;
       });
 
-      html += `</table><h3>Grand Total: ₹${total.toFixed(2)}</h3><p style="text-align:center">Thank You 🙏</p><script>window.print();<\/script></body></html>`;
+      html += `</table><h3 style="text-align:center">Total: ₹${total.toFixed(2)}</h3><p style="text-align:center">Thank You 🙏</p><script>window.print();<\/script></body></html>`;
       printWindow.document.write(html);
     }
 
-    // ==================== DATA EXPORT/IMPORT ====================
-    function exportData() {
-      const data = {products, bill, timestamp: new Date().toISOString()};
-      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = `chourashiya_backup_${new Date().toISOString().slice(0, 10)}.json`;
-      link.click();
-      link.remove();
-    }
-
-    function clearAllData() {
-      if (confirm("⚠️ सारा Data Delete कर दें?")) {
-        products = [];
-        bill = [];
-        localStorage.clear();
-        updateUI();
-        alert("✅ All Data Cleared!");
-      }
-    }
-
-    // ==================== AI ASSISTANT ====================
-    function startVoice() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) return alert("Voice support नहीं है।");
-
-      const recognition = new SpeechRecognition();
-      const micBtn = document.getElementById("micButton");
-
-      recognition.lang = 'hi-IN';
-      recognition.start();
-      micBtn.classList.add('listening');
-
-      recognition.onresult = (event) => {
-        let transcript = '';
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          transcript += event.results[i][0].transcript;
-        }
-        domCache.aiQuery.value = transcript;
-      };
-
-      recognition.onend = () => {
-        micBtn.classList.remove('listening');
-      };
-
-      recognition.onerror = (event) => {
-        console.error("Speech error:", event.error);
-        micBtn.classList.remove('listening');
-      };
-    }
-
+    // ==================== AI ====================
     function askAI() {
-      const query = domCache.aiQuery.value.trim();
+      const query = document.getElementById("aiQuery").value.trim();
       if (!query) {
-        domCache.aiResponse.innerHTML = "🙋 कुछ पूछिए...";
+        domCache.aiResponse.innerHTML = "🙋 Ask something...";
         return;
       }
 
-      domCache.aiResponse.innerHTML = "🤖 AI सोच रहा है...";
+      domCache.aiResponse.innerHTML = "🤖 Thinking...";
 
       setTimeout(() => {
-        let response = `आपने पूछा: "${query}"\n\n`;
+        let response = `Query: "${query}"\n\n`;
 
-        if (query.toLowerCase().includes('total') || query.toLowerCase().includes('तोल')) {
+        if (query.toLowerCase().includes('total')) {
           const total = bill.reduce((sum, item) => sum + (item.total || 0), 0);
-          response += `📊 Current Bill Total: ₹${total.toFixed(2)}\n`;
+          response += `📊 Bill Total: ₹${total.toFixed(2)}\n`;
         }
 
-        if (query.toLowerCase().includes('stock') || query.toLowerCase().includes('स्टॉक')) {
-          response += `📦 Stock Items:\n`;
+        if (query.toLowerCase().includes('stock')) {
+          response += `📦 Stock:\n`;
           products.forEach(p => {
             response += `• ${p.name}: ${p.qty} units\n`;
           });
         }
 
-        if (query.toLowerCase().includes('rate') || query.toLowerCase().includes('रेट')) {
-          response += `💰 Product Rates:\n`;
+        if (query.toLowerCase().includes('rate')) {
+          response += `💰 Rates:\n`;
           products.slice(0, 5).forEach(p => {
-            response += `• ${p.name}: ₹${p.selling}/unit\n`;
+            response += `• ${p.name}: ₹${p.selling}\n`;
           });
         }
 
-        domCache.aiResponse.innerHTML = response || "ℹ️ Inventory में खोज रहे हैं...";
+        domCache.aiResponse.innerHTML = response || "No info found...";
       }, 600);
     }
 
-    // ==================== UI UPDATE ====================
+    // ==================== EXPORT ====================
+    function exportData() {
+      const data = {products, bill, timestamp: new Date().toISOString()};
+      const blob = new Blob([JSON.stringify(data, null, 2)], {type: 'application/json'});
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `chourashiya_${new Date().toISOString().slice(0, 10)}.json`;
+      link.click();
+    }
+
+    function clearAllData() {
+      if (confirm("Delete all data?")) {
+        products = [];
+        bill = [];
+        localStorage.clear();
+        updateUI();
+      }
+    }
+
+    // ==================== UI ====================
     function updateUI() {
       renderProductTable();
       renderBillTable();
     }
 
-    // ==================== INITIALIZATION ====================
+    // ==================== INIT ====================
     window.addEventListener('load', () => {
       domCache.init();
       initTheme();
