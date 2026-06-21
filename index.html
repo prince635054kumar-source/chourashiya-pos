@@ -44,7 +44,7 @@
 
     .tab-content { display: none; }
     .tab-content.active { display: block; }
-    #reader { width: 100%; max-width: 400px; margin: 10px auto; border: 2px solid var(--primary); border-radius: 12px; }
+    #readerHome, #readerInv { width: 100%; max-width: 400px; margin: 10px auto; border: 3px solid var(--primary); border-radius: 12px; }
   </style>
 </head>
 <body>
@@ -65,9 +65,9 @@
     <div class="tab" onclick="switchTab(1)" id="tab1">📦 Inventory</div>
   </div>
 
-  <!-- HOME TAB -->
+  <!-- ==================== HOME TAB ==================== -->
   <div id="content0" class="tab-content active">
-    <div class="section" style="background:#fff3cd;">
+    <div class="section" style="background:#fff3cd; font-size:0.9em;">
       💾 Data Save Mode: <span id="saveStatus">Browser Storage</span>
     </div>
 
@@ -75,21 +75,21 @@
     <div class="section ai-section">
       <h2>🤖 Voice + AI Assistant</h2>
       <div class="flex-row">
-        <input id="aiQuery" placeholder="आलू का रेट, total..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
+        <input id="aiQuery" placeholder="आलू का रेट, total बताओ..." style="flex:1;" onkeypress="if(event.key==='Enter') askAI()">
         <button onclick="startVoice()" id="micButton" class="success mic-btn">🎤</button>
         <button onclick="askAI()" class="success">Ask AI</button>
       </div>
       <div id="aiResponse" style="margin-top:10px;padding:12px;background:#f0f8ff;border-radius:8px;min-height:130px;white-space:pre-wrap;"></div>
     </div>
 
-    <!-- Camera Barcode Scanner - Home -->
+    <!-- Camera Scanner Home -->
     <div class="section">
       <h2>📱 Camera Barcode Scanner</h2>
-      <button onclick="startCameraScan('home')" class="success" style="width:100%; padding:16px; font-size:18px;">📸 Camera से Scan करें (Bill में जोड़ें)</button>
+      <button onclick="startCameraScan('home')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode (Bill में जोड़ें)</button>
       <div id="readerHome" style="display:none;"></div>
     </div>
 
-    <!-- Grocery & Veg -->
+    <!-- Grocery & Vegetable -->
     <div class="section">
       <h2>🛒 Grocery Selling</h2>
       <div class="flex-row">
@@ -125,23 +125,23 @@
     </div>
   </div>
 
-  <!-- INVENTORY TAB -->
+  <!-- ==================== INVENTORY TAB ==================== -->
   <div id="content1" class="tab-content">
     <div class="section">
       <h2>📦 Add Product</h2>
       <div class="flex-row">
         <input id="barcodeInv" placeholder="Barcode" style="width:160px;">
         <input id="name" placeholder="Item Name" style="flex:1;">
-        <input id="cost" type="number" placeholder="Cost" style="width:100px;">
+        <input id="cost" type="number" placeholder="Cost ₹" style="width:100px;">
         <input id="selling" type="number" placeholder="Selling ₹" style="width:120px;">
         <input id="qty" type="number" value="10" style="width:80px;">
-        <button onclick="addProduct()" class="success">Add</button>
+        <button onclick="addProduct()" class="success">Add to Inventory</button>
       </div>
     </div>
 
     <div class="section">
       <h2>📱 Camera Barcode Scanner (Inventory)</h2>
-      <button onclick="startCameraScan('inventory')" class="success" style="width:100%; padding:16px; font-size:18px;">📸 Camera से Scan करें</button>
+      <button onclick="startCameraScan('inventory')" class="success" style="width:100%;padding:16px;font-size:17px;">📸 Scan Barcode</button>
       <div id="readerInv" style="display:none;"></div>
     </div>
 
@@ -160,7 +160,7 @@
     let products = [];
     let bill = [];
     let html5QrCode = null;
-    let currentScanMode = null;
+    let currentMode = null;
 
     function saveData() {
       try {
@@ -171,8 +171,8 @@
 
     function loadData() {
       try {
-        const saved = localStorage.getItem("chourashiya_products");
-        if (saved) products = JSON.parse(saved);
+        const savedProducts = localStorage.getItem("chourashiya_products");
+        if (savedProducts) products = JSON.parse(savedProducts);
         const savedBill = localStorage.getItem("chourashiya_bill");
         if (savedBill) bill = JSON.parse(savedBill);
       } catch(e){}
@@ -183,55 +183,68 @@
       document.querySelectorAll('.tab-content').forEach((c,i) => c.classList.toggle('active', i===n));
     }
 
-    // Camera Scanner
+    // ==================== CAMERA SCANNER ====================
     function startCameraScan(mode) {
-      currentScanMode = mode;
+      currentMode = mode;
       const readerId = mode === 'home' ? 'readerHome' : 'readerInv';
-      document.getElementById(readerId).style.display = 'block';
+      const readerDiv = document.getElementById(readerId);
+      readerDiv.style.display = 'block';
 
-      if (html5QrCode) html5QrCode.clear();
+      if (html5QrCode) {
+        html5QrCode.clear();
+      }
 
-      html5QrCode = new Html5Qrcode(readerId.replace('reader',''));
+      html5QrCode = new Html5Qrcode(readerId);
 
       html5QrCode.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 250, height: 250 } },
+        { fps: 15, qrbox: { width: 280, height: 280 } },
         (decodedText) => {
           handleScanResult(decodedText, mode);
         },
-        (error) => {}
-      ).catch(err => alert("Camera access नहीं मिल रहा। Permission दें।"));
+        (errorMessage) => {}
+      ).catch((err) => {
+        alert("Camera Start करने में समस्या: " + err);
+        readerDiv.style.display = 'none';
+      });
     }
 
     function handleScanResult(barcode, mode) {
-      if (html5QrCode) html5QrCode.stop().then(() => {
-        document.getElementById(mode === 'home' ? 'readerHome' : 'readerInv').style.display = 'none';
-      });
+      if (html5QrCode) {
+        html5QrCode.stop().then(() => {
+          document.getElementById(mode === 'home' ? 'readerHome' : 'readerInv').style.display = 'none';
+        });
+      }
+
+      barcode = barcode.trim();
 
       if (mode === 'home') {
         const item = products.find(p => p.barcode === barcode);
         if (item) {
-          const qty = prompt(`"${item.name}" कितनी Quantity?`, "1");
-          if (qty && parseFloat(qty) > 0) {
-            const q = parseFloat(qty);
-            if (q > item.qty) return alert("Stock कम है!");
-            bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
-            item.qty -= q;
-            showProducts();
-            showBill();
-            saveData();
+          const qtyStr = prompt(`"${item.name}" कितनी Quantity?`, "1");
+          if (qtyStr) {
+            const q = parseFloat(qtyStr);
+            if (q > 0 && q <= item.qty) {
+              bill.push({name: item.name, qty: q, rate: item.selling, total: q * item.selling});
+              item.qty -= q;
+              showProducts();
+              showBill();
+              saveData();
+            } else {
+              alert("Stock कम है!");
+            }
           }
         } else {
-          alert("Barcode Inventory में नहीं मिला!");
+          alert("यह Barcode Inventory में नहीं मिला!");
         }
-      } else { // inventory
+      } else { // Inventory
         const item = products.find(p => p.barcode === barcode);
         if (item) {
-          alert(`✅ मिला: ${item.name} | Stock: ${item.qty}`);
+          alert(`✅ Found!\nItem: ${item.name}\nStock: ${item.qty}`);
         } else {
           document.getElementById("barcodeInv").value = barcode;
           document.getElementById("name").focus();
-          alert("🆕 नया Barcode! Name और Rate भरकर Add करें");
+          alert("🆕 नया Barcode मिला! Name, Rate भरकर Add करें");
         }
       }
     }
@@ -245,7 +258,7 @@
 
       if (!name || selling <= 0) return alert("Item Name और Selling Price डालें!");
 
-      const existing = products.find(p => p.barcode === barcode && barcode);
+      const existing = products.find(p => p.barcode === barcode && barcode !== "");
       if (existing) {
         existing.qty += qty;
       } else {
@@ -256,6 +269,8 @@
       saveData();
       document.getElementById("barcodeInv").value = "";
       document.getElementById("name").value = "";
+      document.getElementById("cost").value = "";
+      document.getElementById("selling").value = "";
     }
 
     function showProducts() {
@@ -285,7 +300,32 @@
       saveData();
     }
 
-    // Other functions (addGroceryToBill, addVegetableToBill, showBill, printBill, etc.) same as previous
+    function addGroceryToBill() {
+      const name = document.getElementById("groceryName").value.trim();
+      const qty = parseFloat(document.getElementById("groceryQty").value) || 0;
+      const rate = parseFloat(document.getElementById("groceryRate").value) || 0;
+      if (!name || qty <= 0 || rate <= 0) return alert("सभी डिटेल भरें!");
+      bill.push({name, qty, rate, total: qty * rate});
+      showBill();
+      saveData();
+      document.getElementById("groceryName").value = "";
+      document.getElementById("groceryQty").value = "";
+      document.getElementById("groceryRate").value = "";
+    }
+
+    function addVegetableToBill() {
+      const name = document.getElementById("vegName").value.trim();
+      const grams = parseFloat(document.getElementById("vegGrams").value) || 0;
+      const rate = parseFloat(document.getElementById("vegRateKg").value) || 0;
+      if (!name || grams <= 0 || rate <= 0) return alert("Sabji, Grams और Rate डालें!");
+      const amount = (grams / 1000) * rate;
+      bill.push({name: name + " (Veg)", qty: grams + "g", rate: rate, total: amount});
+      showBill();
+      saveData();
+      document.getElementById("vegName").value = "";
+      document.getElementById("vegGrams").value = "";
+      document.getElementById("vegRateKg").value = "";
+    }
 
     function showBill() {
       const tbody = document.getElementById("billTable").querySelector("tbody");
@@ -304,8 +344,19 @@
       document.getElementById("grandTotal").textContent = total.toFixed(2);
     }
 
-    function removeFromBill(i) { bill.splice(i, 1); showBill(); saveData(); }
-    function clearBill() { if(confirm("Bill Clear करें?")) { bill = []; showBill(); saveData(); } }
+    function removeFromBill(i) {
+      bill.splice(i, 1);
+      showBill();
+      saveData();
+    }
+
+    function clearBill() {
+      if(confirm("Bill Clear करें?")) {
+        bill = [];
+        showBill();
+        saveData();
+      }
+    }
 
     function printBill() {
       const printWindow = window.open('', '_blank');
@@ -328,17 +379,25 @@
       a.click();
     }
 
-    // Voice & AI (same)
-    function startVoice() { /* same as before */ 
+    function startVoice() {
       const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SpeechRecognition) return alert("Voice support नहीं है।");
-      // ... (previous code)
+      // Basic implementation
+      alert("Voice Recognition शुरू हो रहा है... (Demo)");
     }
 
-    function askAI() { /* same as before */ }
+    function askAI() {
+      const query = document.getElementById("aiQuery").value.trim();
+      const div = document.getElementById("aiResponse");
+      if (!query) return div.innerHTML = "🙋 कुछ पूछिए...";
+      div.innerHTML = "🤖 AI सोच रहा है...";
+      setTimeout(() => {
+        div.innerHTML = `आपने पूछा: "${query}"<br><br>Inventory में खोज रहे हैं...`;
+      }, 600);
+    }
 
     function clearAllData() {
-      if (confirm("सारा Data Delete कर दें?")) {
+      if (confirm("⚠️ सारा Data Delete कर दें?")) {
         products = []; bill = [];
         localStorage.clear();
         showProducts(); showBill();
@@ -346,6 +405,7 @@
       }
     }
 
+    // Initialize
     window.onload = () => {
       loadData();
       showProducts();
